@@ -1,12 +1,15 @@
 # BigQuery query - bqq
 
-Simple BigQuery CLI that will print estimated size of processed data
+Simple BigQuery CLI:
+ - print estimated size and cost of query
+ - cache results
 
 ### Instalation
 
 1. `git clone https://github.com/martintupy/bqq && cd bqq`
 2. `pip install --compile --user .`
-3. `Add local bin to $PATH`
+3. `sh init.sh`
+4. `Add local bin to $PATH`
     - In .zshrc / .bashrc add this path `"$(python -m site --user-base)/bin"`
 
 
@@ -18,7 +21,6 @@ Usage: bqq [OPTIONS] [SQL]
 Options:
   -f, --file FILENAME  File containing SQL
   -y, --yes            Automatic yes to prompt
-  --pager              Output via pager
   --help               Show this message and exit.
 ```
 
@@ -28,11 +30,6 @@ Options:
 bqq "SELECT repository.url, repository.created_at FROM bigquery-public-data.samples.github_nested LIMIT 100"
 Estimated size: 150.3MiB
 Do you want to continue? [y/N]:
-```
-
-
-```bash
-bqq --pager "SELECT repository.url, repository.created_at FROM bigquery-public-data.samples.github_nested"
 ```
 
 ```bash

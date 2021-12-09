@@ -1,9 +1,11 @@
-from google.api_core.page_iterator import Page
-from google.cloud.bigquery import Client, QueryJobConfig
-from prettytable import PrettyTable
-from prettytable.prettytable import PLAIN_COLUMNS
+import uuid
+from uuid import UUID
 
-from bqq.util import size_fmt, hex, price_fmt
+from google.cloud.bigquery import Client, QueryJobConfig
+
+from bqq.csv import write_csv
+from bqq.db import insert_id
+from bqq.util import price_fmt, size_fmt
 
 
 def estimate(client: Client, query: str):
@@ -15,14 +17,11 @@ def estimate(client: Client, query: str):
     return size, cost
 
 
-def run_query(client: Client, query: str) -> PrettyTable:
+def run_query(client: Client, query: str) -> UUID:
+    id = uuid.uuid4()
     result = client.query(query).result()
-    table = PrettyTable()
-    table.field_names = [hex("58A33B")(field.name) for field in result.schema]
-    for row in result:
-        table.add_row(row)
-    table.align = "l"
-    table.vertical_char = hex("545454")("|")
-    table.horizontal_char = hex("545454")("-")
-    table.junction_char = hex("545454")("+")
-    return table
+    header = [field.name for field in result.schema]
+    rows = list(result)
+    insert_id(query, id)
+    write_csv(id, header, rows)
+    return id
