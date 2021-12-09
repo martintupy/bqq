@@ -1,3 +1,4 @@
+import os
 import click
 from google.cloud import bigquery
 from prettytable import PrettyTable
@@ -28,6 +29,7 @@ def cli(sql, file, yes, pager):
     if confirmed:
         message = run_query(client, query).get_string()
         if pager:
+            os.environ["LESS"] += " -S" # enable horizontal scrolling for less
             click.echo_via_pager(message)
         else:
             click.echo(message)
