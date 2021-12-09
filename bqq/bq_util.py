@@ -16,7 +16,6 @@ def run_query(client: Client, query: str) -> PrettyTable:
     result = client.query(query).result()
     table = PrettyTable()
     table.field_names = [field.name for field in result.schema]
-    page: Page = result.pages.__next__()
-    for item in page:
-        table.add_row(item)
+    for row in result:
+        table.add_row(row)
     return table
