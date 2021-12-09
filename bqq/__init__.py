@@ -3,7 +3,7 @@ import click
 from google.cloud import bigquery
 from prettytable import PrettyTable
 
-from bqq.bq_util import estimate_size, run_query
+from bqq.bq_util import estimate, run_query
 
 
 @click.command()
@@ -19,11 +19,11 @@ def cli(sql, file, yes, pager):
         query = sql
 
     client = bigquery.Client()
-    size = estimate_size(client, query)
+    size, cost = estimate(client, query)
     
     confirmed = yes
     if not confirmed:
-        click.echo(f"Estimated size: {size}")
+        click.echo(f"Estimated size: {size} cost: {cost}")
         confirmed = click.confirm("Do you want to continue?", default=False)
 
     if confirmed:

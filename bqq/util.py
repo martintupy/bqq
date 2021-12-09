@@ -1,12 +1,19 @@
 import math
 
 
-def num_fmt(num, suffix="B"):
-    for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:
-        if abs(num) < 1024.0:
-            return f"{num:3.1f}{unit}{suffix}"
-        num /= 1024.0
-    return f"{num:.1f}Yi{suffix}"
+def size_fmt(num):
+    for unit in ["B", "KB", "MB", "GB", "TB", "PB"]:
+        if abs(num) < 1000:
+            size = round(num, 1)
+            return hex("D4BD1E")(f"{size}{unit}")
+        else:
+            num /= 1000
+
+
+def price_fmt(num):
+    tb = num / 1e12
+    price = round(tb * 5, 2)
+    return hex("D4BD1E")(f"{price}$")
 
 
 def rgb(r: int, g: int, b: int):
