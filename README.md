@@ -26,7 +26,10 @@ Options:
 
 ```bash
 bqq "SELECT repository.url, repository.created_at FROM bigquery-public-data.samples.github_nested LIMIT 100"
+Estimated size: 150.3MiB
+Do you want to continue? [y/N]:
 ```
+
 
 ```bash
 bqq --pager "SELECT repository.url, repository.created_at FROM bigquery-public-data.samples.github_nested"
