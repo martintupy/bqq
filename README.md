@@ -25,9 +25,12 @@ Options:
 ## Examples
 
 ```bash
-bqq "SELECT * FROM bigquery-public-data.hacker_news.stories LIMIT 100"
+bqq "SELECT repository.url, repository.created_at FROM bigquery-public-data.samples.github_nested LIMIT 100"
 ```
 
+```bash
+bqq --pager "SELECT repository.url, repository.created_at FROM bigquery-public-data.samples.github_nested"
+```
 
 ```bash
 bqq -f query.sql
