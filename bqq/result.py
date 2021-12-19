@@ -37,4 +37,3 @@ def read(date: str) -> PrettyTable:
 
     table.align = "l"
     return table
-

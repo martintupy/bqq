@@ -1,5 +1,8 @@
+import shutil
 import subprocess
 import tempfile
+
+from bqq.const import MAX_LINES
 
 
 def size_fmt(num):
@@ -26,6 +29,13 @@ def rgb(r: int, g: int, b: int):
 
 def hex_color(hexstr: str):
     return rgb(*tuple(int(hexstr.lstrip("#")[i : i + 2], 16) for i in (0, 2, 4)))
+
+
+def use_less(message: str) -> bool:
+    height = len(message.split("\n"))
+    width = len(max(message.split("\n")))
+    cols = shutil.get_terminal_size().columns
+    width > cols or height > MAX_LINES
 
 
 def fzf(choices: list):

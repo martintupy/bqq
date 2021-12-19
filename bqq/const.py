@@ -9,3 +9,5 @@ HIGHTLIGHT = "D4BD1E"
 
 BQQ_HOME = f"{Path.home()}/.bqq"
 BQQ_CSV = f"{BQQ_HOME}/csv"
+
+MAX_LINES = 1000

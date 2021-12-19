@@ -5,6 +5,7 @@ from google.cloud.bigquery import Client
 
 from bqq import db, result
 from bqq.bq_util import dry_run, get_header, run_query
+from bqq.util import use_less
 
 
 @click.command()
@@ -41,8 +42,11 @@ def cli(sql: str, file: str, dates: bool, queries: bool, yes: bool, clear: bool)
 
     if date:
         message = result.read(date).get_string()
-        os.environ["LESS"] += " -S"  # enable horizontal scrolling for less
-        click.echo_via_pager(message)
+        if use_less(message):
+            os.environ["LESS"] += " -S"  # enable horizontal scrolling for less
+            click.echo_via_pager(message)
+        else:
+            click.echo(message)
 
 
 def call_api(yes: bool, query: str):
