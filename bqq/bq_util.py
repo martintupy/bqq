@@ -1,15 +1,14 @@
 from datetime import datetime
-from logging import error
+
 import click
 from google.api_core.exceptions import BadRequest
-
 from google.cloud.bigquery import Client, QueryJobConfig
 from prettytable import PrettyTable
 
+from bqq import util
 from bqq.const import ERROR, HIGHTLIGHT, TABLE_BORDER, TABLE_HEADER
 from bqq.db import insert_query
 from bqq.result import write
-from bqq import util
 from bqq.util import price_fmt, size_fmt
 
 
@@ -23,6 +22,7 @@ def dry_run(client: Client, query: str):
         click.echo(util.hex_color(ERROR)(e.message), err=True)
     return job
 
+
 def run_query(client: Client, query: str) -> str:
     q = client.query(query)
     job_id = q.job_id
@@ -31,8 +31,8 @@ def run_query(client: Client, query: str) -> str:
     header = [field.name for field in result.schema]
     rows = list(result)
     insert_query(date, query, job_id)
-    write(date, header, rows)
-    return date
+    write(job_id, header, rows)
+    return job_id
 
 
 def get_header(job, project) -> str:

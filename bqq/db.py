@@ -1,10 +1,11 @@
+from datetime import datetime
 from typing import Optional
 
 from tinydb import Query, TinyDB
 from tinydb.table import Document
 
 from bqq import util
-from bqq.const import BQQ_HOME
+from bqq.const import BQQ_HOME, HIGHTLIGHT, ID
 
 db = TinyDB(f"{BQQ_HOME}/db.json")
 Q = Query()
@@ -15,19 +16,19 @@ def clear():
     db.truncate()
 
 
-def pick_query() -> str:
-    queries = reversed([row["query"] for row in db.all()])
-    query = util.fzf(queries)
-    if query:
-        return db.search(Q.query == query)[0]["date"]
-    else:
-        return None
-
-
-def pick_date() -> str:
-    dates = reversed([row["date"] for row in db.all()])
-    date = util.fzf(dates)
-    return date
+def results() -> str:
+    sep = " - "
+    results = []
+    for row in db.all():
+        datefmt = datetime.fromisoformat(row["date"]).strftime("%Y-%m-%d %H:%M:%S")
+        date = util.hex_color(HIGHTLIGHT)(datefmt)
+        query = util.color_keywords(row["query"])
+        job_id = util.hex_color(ID)(row["job_id"])
+        result = sep.join([date, query, job_id])
+        results.append(result)
+    pick = util.fzf(reversed(results))
+    job_id = pick.split(sep)[-1]
+    return job_id
 
 
 def find_date(date: str) -> Optional[Document]:

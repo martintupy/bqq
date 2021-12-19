@@ -2,7 +2,7 @@ import shutil
 import subprocess
 import tempfile
 
-from bqq.const import MAX_LINES
+from bqq.const import BQ_KEYWORDS, KEYWORD, MAX_LINES
 
 
 def size_fmt(num):
@@ -38,6 +38,16 @@ def use_less(message: str) -> bool:
     width > cols or height > MAX_LINES
 
 
+def color_keywords(query: str) -> str:
+    words = []
+    for word in query.split():
+        if word in BQ_KEYWORDS:
+            words.append(hex_color(KEYWORD)(word))
+        else:
+            words.append(word)
+    return " ".join(words)
+
+
 def fzf(choices: list):
     choices_str = "\n".join(map(str, choices))
     selection = None
@@ -46,7 +56,7 @@ def fzf(choices: list):
             input_file.write(choices_str.encode("utf-8"))
             input_file.flush()
             cat = subprocess.Popen(["cat", input_file.name], stdout=subprocess.PIPE)
-            subprocess.run(["fzf"], stdin=cat.stdout, stdout=output_file)
+            subprocess.run(["fzf", "--ansi"], stdin=cat.stdout, stdout=output_file)
             cat.wait()
             with open(output_file.name) as f:
                 selection = f.readline().strip("\n")

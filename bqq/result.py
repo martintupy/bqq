@@ -1,11 +1,11 @@
 import csv
+import glob
+import os
 
 from prettytable import PrettyTable
 
 from bqq.const import BQQ_CSV, TABLE_BORDER, TABLE_HEADER
 from bqq.util import hex_color
-import os
-import glob
 
 
 def clear():
@@ -14,16 +14,16 @@ def clear():
         os.remove(f)
 
 
-def write(date: str, header, rows):
-    filename = f"{BQQ_CSV}/{date}.csv"
+def write(id: str, header, rows):
+    filename = f"{BQQ_CSV}/{id}.csv"
     with open(filename, "w") as f:
         writer = csv.writer(f)
         writer.writerow(header)
         writer.writerows(rows)
 
 
-def read(date: str) -> PrettyTable:
-    filename = f"{BQQ_CSV}/{date}.csv"
+def read(id: str) -> PrettyTable:
+    filename = f"{BQQ_CSV}/{id}.csv"
     table = PrettyTable()
     table.vertical_char = hex_color(TABLE_BORDER)("|")
     table.horizontal_char = hex_color(TABLE_BORDER)("-")

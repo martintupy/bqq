@@ -6,7 +6,7 @@ Simple BigQuery CLI:
   - billed project
   - cost
   - size 
-- provide search history of past cached results
+- provide search history of past results
 
 ### Requirements
 
@@ -29,8 +29,7 @@ Usage: bqq [OPTIONS] [SQL]
 Options:
   -f, --file FILENAME  File containing SQL
   -y, --yes            Automatic yes to prompt
-  --dates              Search results from past execution dates
-  --queries            Search results from past queries
+  -r, --results        Search past results
   --clear              Clear all past results
   --help               Show this message and exit.
 ```
