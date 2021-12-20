@@ -37,6 +37,7 @@ def get_all() -> List[JobInfo]:
                 job_id=row.get("job_id"),
                 bytes_billed=row.get("bytes_billed"),
                 cache_hit=row.get("cache_hit"),
+                slot_millis=row.get("slot_millis"),
             )
         )
     return all
@@ -54,5 +55,6 @@ def insert(info: JobInfo):
             "job_id": info.job_id,
             "bytes_billed": info.bytes_billed,
             "cache_hit": info.cache_hit,
+            "slot_millis": info.slot_millis,
         }
     )

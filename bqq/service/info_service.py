@@ -1,10 +1,10 @@
 from datetime import datetime
 
 import sqlparse
-from tinydb.queries import Query
 from bqq import const, info
 from bqq.types import JobInfo
 from bqq.util import bash_util, bq_util
+from tinydb.queries import Query
 
 
 def search() -> JobInfo:
@@ -27,13 +27,13 @@ def search() -> JobInfo:
 
 
 def get_info(job_info: JobInfo) -> str:
-    creation_time = bash_util.hex_color(const.TIME)(job_info.created_fmt)
     cache_hit = "(cache hit)" if job_info.cache_hit else ""
     query_cost = bq_util.price_fmt(job_info.bytes_billed)
     console_link = bash_util.hex_color(const.LINK)(job_info.google_link)
     lines = [
-        f"{bash_util.hex_color(const.INFO)('Creation time')} = {creation_time}",
+        f"{bash_util.hex_color(const.INFO)('Creation time')} = {job_info.created_fmt}",
         f"{bash_util.hex_color(const.INFO)('Query cost')} = {query_cost} {cache_hit}",
+        f"{bash_util.hex_color(const.INFO)('Slot time')} = {job_info.slot_time}",
         f"{bash_util.hex_color(const.INFO)('Console link')} = {console_link}",
     ]
     return "\n".join(lines)

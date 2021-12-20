@@ -29,10 +29,11 @@ def run_query(client: Client, query: str) -> JobInfo:
     location = q.location
     created = q.created
     bytes_billed = q.total_bytes_billed
+    slot_millis = q.slot_millis
     cache_hit = q.cache_hit
     header = [field.name for field in result.schema]
     rows = list(result)
-    job_info = JobInfo(created, query, project, location, job_id, bytes_billed, cache_hit)
+    job_info = JobInfo(created, query, project, location, job_id, bytes_billed, cache_hit, slot_millis)
     info.insert(job_info)
     results.write(job_id, header, rows)
     return job_info

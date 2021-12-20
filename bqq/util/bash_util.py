@@ -1,4 +1,3 @@
-import colorsys
 import re
 import shutil
 import subprocess
@@ -6,7 +5,6 @@ import tempfile
 from typing import Tuple
 
 from bqq import const
-from bqq.types import JobInfo
 from prettytable.prettytable import PrettyTable
 
 ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")

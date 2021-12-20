@@ -2,9 +2,6 @@ import csv
 import glob
 import os
 
-from prettytable import PrettyTable
-from prettytable.prettytable import ALL, MARKDOWN, MSWORD_FRIENDLY, NONE, PLAIN_COLUMNS
-
 from bqq import const
 from bqq.util import bash_util
 
