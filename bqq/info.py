@@ -31,10 +31,12 @@ def get_all() -> List[JobInfo]:
         all.append(
             JobInfo(
                 created=datetime.fromisoformat(row["created"]),
-                query=row["query"],
-                project=row["project"],
-                location=row["location"],
-                job_id=row["job_id"],
+                query=row.get("query"),
+                project=row.get("project"),
+                location=row.get("location"),
+                job_id=row.get("job_id"),
+                bytes_billed=row.get("bytes_billed"),
+                cache_hit=row.get("cache_hit"),
             )
         )
     return all
@@ -50,5 +52,7 @@ def insert(info: JobInfo):
             "project": info.project,
             "location": info.location,
             "job_id": info.job_id,
+            "bytes_billed": info.bytes_billed,
+            "cache_hit": info.cache_hit,
         }
     )

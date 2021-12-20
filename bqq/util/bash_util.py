@@ -12,18 +12,29 @@ from prettytable.prettytable import PrettyTable
 ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
 
 
-def rgb(r: int, g: int, b: int):
+def rgb_fg(r: int, g: int, b: int):
     def inner(text: str) -> str:
         return f"\x1b[38;2;{r};{g};{b}m{text}\x1b[0m"
 
     return inner
 
 
-def hex_color(hexstr: str, amount=1.0):
-    r, g, b = tuple(int(hexstr.lstrip("#")[i : i + 2], 16) for i in (0, 2, 4))
-    h, l, s = colorsys.rgb_to_hls(r, g, b)
-    rr, gg, bb = colorsys.hls_to_rgb(h, l * amount, s)
-    return rgb(int(rr), int(gg), int(bb))
+def rgb_bg(r: int, g: int, b: int):
+    def inner(text: str) -> str:
+        return f"\x1b[48;2;{r};{g};{b}m{text}\x1b[0m"
+
+    return inner
+
+
+def hex_color(fg: str = None, bg: str = None):
+    def inner(text: str) -> str:
+        if fg:
+            text = rgb_fg(*tuple(int(fg.lstrip("#")[i : i + 2], 16) for i in (0, 2, 4)))(text)
+        if bg:
+            text = rgb_bg(*tuple(int(bg.lstrip("#")[i : i + 2], 16) for i in (0, 2, 4)))(text)
+        return text
+
+    return inner
 
 
 def use_less(message: str) -> bool:
@@ -64,3 +75,18 @@ def fzf(choices: list):
             with open(output_file.name) as f:
                 selection = f.readline().strip("\n")
     return selection
+
+def table() -> PrettyTable:
+    table = PrettyTable()
+    table.top_junction_char = hex_color(const.DARKER)("┳")
+    table.top_left_junction_char = hex_color(const.DARKER)("┏")
+    table.top_right_junction_char = hex_color(const.DARKER)("┓")
+    table.bottom_junction_char = hex_color(const.DARKER)("┻")
+    table.bottom_left_junction_char = hex_color(const.DARKER)("┗")
+    table.bottom_right_junction_char = hex_color(const.DARKER)("┛")
+    table.left_junction_char = hex_color(const.DARKER)("┣")
+    table.right_junction_char = hex_color(const.DARKER)("┫")
+    table.vertical_char = hex_color(const.DARKER)("┃")
+    table.horizontal_char = hex_color(const.DARKER)("━")
+    table.junction_char = hex_color(const.DARKER)("╋")
+    return table

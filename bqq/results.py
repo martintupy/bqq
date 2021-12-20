@@ -3,6 +3,7 @@ import glob
 import os
 
 from prettytable import PrettyTable
+from prettytable.prettytable import ALL, MARKDOWN, MSWORD_FRIENDLY, NONE, PLAIN_COLUMNS
 
 from bqq import const
 from bqq.util import bash_util
@@ -22,18 +23,14 @@ def write(id: str, header, rows):
         writer.writerows(rows)
 
 
-def read(id: str) -> PrettyTable:
+def read(id: str) -> str:
     filename = f"{const.BQQ_CSV}/{id}.csv"
-    table = PrettyTable()
-    table.vertical_char = bash_util.hex_color(const.TABLE_BORDER)("|")
-    table.horizontal_char = bash_util.hex_color(const.TABLE_BORDER)("-")
-    table.junction_char = bash_util.hex_color(const.TABLE_BORDER)("+")
+    table = bash_util.table()
     with open(filename) as f:
         reader = csv.reader(f, delimiter=",")
         header = reader.__next__()
-        table.field_names = [bash_util.hex_color(const.TABLE_HEADER)(field) for field in header]
+        table.field_names = header
         for row in reader:
             table.add_row(row)
-
     table.align = "l"
-    return table
+    return table.get_string()

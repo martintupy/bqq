@@ -9,6 +9,8 @@ class JobInfo:
     project: str
     location: str
     job_id: str
+    bytes_billed: int
+    cache_hit: bool
 
     @property
     def created_fmt(self) -> str:

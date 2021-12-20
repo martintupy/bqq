@@ -23,14 +23,16 @@ def dry_run(client: Client, query: str) -> Optional[QueryJob]:
 
 def run_query(client: Client, query: str) -> JobInfo:
     q = client.query(query)
+    result = q.result()
     job_id = q.job_id
     project = q.project
     location = q.location
     created = q.created
-    result = q.result()
+    bytes_billed = q.total_bytes_billed
+    cache_hit = q.cache_hit
     header = [field.name for field in result.schema]
     rows = list(result)
-    job_info = JobInfo(created, query, project, location, job_id)
+    job_info = JobInfo(created, query, project, location, job_id, bytes_billed, cache_hit)
     info.insert(job_info)
     results.write(job_id, header, rows)
     return job_info
@@ -52,11 +54,9 @@ def call_api(yes: bool, query: str) -> Optional[JobInfo]:
 def get_header(job: QueryJob) -> str:
     size = bq_util.size_fmt(job.total_bytes_processed)
     cost = bq_util.price_fmt(job.total_bytes_processed)
-    return (
-        bash_util.hex_color(const.HEADER)("Billed project")
-        + f" = {job.project}\n"
-        + bash_util.hex_color(const.HEADER)("Processed size")
-        + f" = {size}\n"
-        + bash_util.hex_color(const.HEADER)("Estimated cost")
-        + f" = {cost}"
-    )
+    lines = [
+        f"{bash_util.hex_color(const.INFO)('Billing project')} = {job.project}",
+        f"{bash_util.hex_color(const.INFO)('Estimated size')} = {size}",
+        f"{bash_util.hex_color(const.INFO)('Estimated cost')} = {cost}",
+    ]
+    return "\n".join(lines)

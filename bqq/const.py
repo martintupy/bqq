@@ -1,22 +1,14 @@
 from pathlib import Path
 
-# ------------------------#
 # -------- COLORS --------#
-TABLE_BORDER = "545454"
-TABLE_HEADER = "58A33B"
-
 ERROR = "EB4920"
 DARKER = "545454"
-
-HEADER = "58A33B"
+INFO = "58A33B"
 LINK = "7D9DC9"
-
 KEYWORD = "1C73E8"
 ID = "545454"
-
-HIGHTLIGHT = "D4BD1E"
+TIME = "D4BD1E"
 # -------- COLORS --------#
-# ------------------------#
 
 BQQ_HOME = f"{Path.home()}/.bqq"
 BQQ_CSV = f"{BQQ_HOME}/csv"
