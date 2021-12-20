@@ -1,11 +1,12 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Tuple
 
 from tinydb import Query, TinyDB
 from tinydb.table import Document
 
 from bqq import util
 from bqq.const import BQQ_HOME, HIGHTLIGHT, ID
+from bqq.data import Metadata
 
 db = TinyDB(f"{BQQ_HOME}/db.json")
 Q = Query()
@@ -16,7 +17,7 @@ def clear():
     db.truncate()
 
 
-def results() -> str:
+def results() -> Metadata:
     sep = " - "
     results = []
     for row in db.all():
@@ -27,8 +28,10 @@ def results() -> str:
         result = sep.join([date, query, job_id])
         results.append(result)
     pick = util.fzf(reversed(results))
-    job_id = pick.split(sep)[-1]
-    return job_id
+    result = pick.split(sep)
+    sql = result[1]
+    job_id = result[-1]
+    return Metadata(datefmt, sql, job_id)
 
 
 def find_date(date: str) -> Optional[Document]:

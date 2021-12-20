@@ -1,11 +1,14 @@
 import os
+from typing import Optional, Tuple
 
 import click
 from google.cloud.bigquery import Client
 
+
 from bqq import db, result
 from bqq.bq_util import dry_run, get_header, run_query
-from bqq.util import use_less
+from bqq.data import Metadata
+from bqq.util import result_header, use_less, color_keywords
 
 
 @click.command()
@@ -16,15 +19,15 @@ from bqq.util import use_less
 @click.option("--clear", help="Clear all past results", is_flag=True)
 def cli(sql: str, file: str, yes: bool, results: bool, clear: bool):
     """BiqQuery query."""
-    job_id = None
+    metadata = None
     if file:
         query = file.read()
-        job_id = call_api(yes, query)
+        metadata = call_api(yes, query)
     elif sql:
         query = sql
-        job_id = call_api(yes, query)
+        metadata = call_api(yes, query)
     elif results:
-        job_id = db.results()
+        metadata = db.results()
     elif clear:
         ctx = click.get_current_context()
         if click.confirm("Clear all results?", default=False):
@@ -37,8 +40,9 @@ def cli(sql: str, file: str, yes: bool, results: bool, clear: bool):
         click.echo(ctx.get_help())
         ctx.exit()
 
-    if job_id:
-        message = result.read(job_id).get_string()
+    if metadata:
+        message = f"{result_header(metadata)}\n"
+        message += result.read(metadata.job_id).get_string()
         if use_less(message):
             os.environ["LESS"] += " -S"  # enable horizontal scrolling for less
             click.echo_via_pager(message)
@@ -46,14 +50,15 @@ def cli(sql: str, file: str, yes: bool, results: bool, clear: bool):
             click.echo(message)
 
 
-def call_api(yes: bool, query: str):
+def call_api(yes: bool, query: str) -> Optional[Metadata]:
     client = Client()
     job = dry_run(client, query)
     confirmed = yes
-    job_id = None
+    metadata = None
     if not confirmed and job:
         click.echo(get_header(job, client.project))
         confirmed = click.confirm("Do you want to continue?", default=False)
     if confirmed and job:
-        job_id = run_query(client, query)
-    return job_id
+        date, job_id = run_query(client, query)
+        metadata = Metadata(date, query, job_id)
+    return metadata

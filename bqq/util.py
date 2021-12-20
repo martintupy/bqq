@@ -1,34 +1,41 @@
 import shutil
 import subprocess
 import tempfile
+import colorsys
 
-from bqq.const import BQ_KEYWORDS, KEYWORD, MAX_LINES
+from prettytable.prettytable import PrettyTable
+from bqq.data import Metadata
+
+from bqq.const import BQ_KEYWORDS, DARKER, KEYWORD, MAX_LINES, TABLE_BORDER, TABLE_HEADER
 
 
 def size_fmt(num):
-    for unit in ["B", "KB", "MB", "GB", "TB", "PB"]:
-        if abs(num) < 1000:
+    for unit in ["B", "KiB", "MiB", "GiB", "TiB", "PiB"]:
+        if abs(num) < 1024:
             size = round(num, 1)
-            return f"{size}{unit}"
+            return f"{size} {unit}"
         else:
-            num /= 1000
+            num /= 1024
 
 
 def price_fmt(num):
     tb = num / 1e12
     price = round(tb * 5, 2)
-    return f"${price}"
+    return f"{price} $"
 
 
 def rgb(r: int, g: int, b: int):
-    def inner(text):
+    def inner(text: str) -> str:
         return f"\x1b[38;2;{r};{g};{b}m{text}\x1b[0m"
 
     return inner
 
 
-def hex_color(hexstr: str):
-    return rgb(*tuple(int(hexstr.lstrip("#")[i : i + 2], 16) for i in (0, 2, 4)))
+def hex_color(hexstr: str, amount=1.0):
+    r, g, b = tuple(int(hexstr.lstrip("#")[i : i + 2], 16) for i in (0, 2, 4))
+    h, l, s = colorsys.rgb_to_hls(r, g, b)
+    rr, gg, bb = colorsys.hls_to_rgb(h, l * amount, s)
+    return rgb(int(rr), int(gg), int(bb))
 
 
 def use_less(message: str) -> bool:
@@ -36,6 +43,15 @@ def use_less(message: str) -> bool:
     width = len(max(message.split("\n")))
     cols = shutil.get_terminal_size().columns
     width > cols or height > MAX_LINES
+
+
+def result_header(metadata: Metadata) -> str:
+    return (
+        hex_color(TABLE_HEADER)("Execution time")
+        + f" = {metadata.datetime}\n"
+        + hex_color(TABLE_HEADER)("Executed query")
+        + f" = {color_keywords(metadata.query)}"
+    )
 
 
 def color_keywords(query: str) -> str:
