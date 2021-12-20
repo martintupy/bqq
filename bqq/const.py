@@ -1,5 +1,7 @@
 from pathlib import Path
 
+# ------------------------#
+# -------- COLORS --------#
 TABLE_BORDER = "545454"
 TABLE_HEADER = "58A33B"
 
@@ -10,12 +12,12 @@ KEYWORD = "1C73E8"
 ID = "545454"
 
 HIGHTLIGHT = "D4BD1E"
+# -------- COLORS --------#
+# ------------------------#
 
 BQQ_HOME = f"{Path.home()}/.bqq"
 BQQ_CSV = f"{BQQ_HOME}/csv"
-
-MAX_LINES = 100
-
+MAX_LINES = 400
 
 BQ_KEYWORDS = [
     "ALL",

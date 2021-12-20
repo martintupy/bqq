@@ -1,29 +1,14 @@
+import colorsys
+import re
 import shutil
 import subprocess
 import tempfile
-import colorsys
-import sqlparse
-import re
 
+from bqq import const
+from bqq.types import JobInfo
 from prettytable.prettytable import PrettyTable
-from bqq.data import Metadata
 
-from bqq.const import BQ_KEYWORDS, DARKER, KEYWORD, MAX_LINES, TABLE_BORDER, TABLE_HEADER
-
-
-def size_fmt(num):
-    for unit in ["B", "KiB", "MiB", "GiB", "TiB", "PiB"]:
-        if abs(num) < 1024:
-            size = round(num, 1)
-            return f"{size} {unit}"
-        else:
-            num /= 1024
-
-
-def price_fmt(num):
-    tb = num / 1e12
-    price = round(tb * 5, 2)
-    return f"{price} $"
+ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
 
 
 def rgb(r: int, g: int, b: int):
@@ -41,27 +26,19 @@ def hex_color(hexstr: str, amount=1.0):
 
 
 def use_less(message: str) -> bool:
-    height = len(message.split("\n"))
-    width = len(max(message.split("\n")))
+    escaped = ansi_escape.sub("", message)
+    height = len(escaped.split("\n"))
+    width = len(max(escaped.split("\n")))
     cols = shutil.get_terminal_size().columns
-    width > cols or height > MAX_LINES
-
-
-def result_header(metadata: Metadata) -> str:
-    sql = sqlparse.format(metadata.query, reindent=True)
-    return (
-        hex_color(TABLE_HEADER)("Execution time")
-        + f" = {metadata.datetime}\n"
-        + color_keywords(sql)
-    )
+    return width > cols or height > const.MAX_LINES
 
 
 def color_keywords(query: str) -> str:
     spaces = re.compile("[^\s]+").split(query)
     words = []
     for word in query.split():
-        if word in BQ_KEYWORDS:
-            words.append(hex_color(KEYWORD)(word))
+        if word in const.BQ_KEYWORDS:
+            words.append(hex_color(const.KEYWORD)(word))
         else:
             words.append(word)
     return "".join(["".join(map(str, i)) for i in zip(spaces, words)])
