@@ -2,6 +2,8 @@ import shutil
 import subprocess
 import tempfile
 import colorsys
+import sqlparse
+import re
 
 from prettytable.prettytable import PrettyTable
 from bqq.data import Metadata
@@ -46,22 +48,23 @@ def use_less(message: str) -> bool:
 
 
 def result_header(metadata: Metadata) -> str:
+    sql = sqlparse.format(metadata.query, reindent=True)
     return (
         hex_color(TABLE_HEADER)("Execution time")
         + f" = {metadata.datetime}\n"
-        + hex_color(TABLE_HEADER)("Executed query")
-        + f" = {color_keywords(metadata.query)}"
+        + color_keywords(sql)
     )
 
 
 def color_keywords(query: str) -> str:
+    spaces = re.compile("[^\s]+").split(query)
     words = []
     for word in query.split():
         if word in BQ_KEYWORDS:
             words.append(hex_color(KEYWORD)(word))
         else:
             words.append(word)
-    return " ".join(words)
+    return "".join(["".join(map(str, i)) for i in zip(spaces, words)])
 
 
 def fzf(choices: list):
