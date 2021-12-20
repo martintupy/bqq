@@ -28,8 +28,12 @@ def search() -> JobInfo:
 
 def get_header(job_info: JobInfo) -> str:
     sql = sqlparse.format(job_info.query, reindent=True)
+    width, _ = bash_util.get_size(sql)
     return (
-        bash_util.hex_color(const.TABLE_HEADER)("Creation time")
-        + f" = {job_info.created}\n"
+        bash_util.hex_color(const.HEADER)("Creation time")
+        + f" = {bash_util.hex_color(const.HIGHTLIGHT)(job_info.created_fmt)}\n"
+        + bash_util.hex_color(const.HEADER)("Console link")
+        + f" = {bash_util.hex_color(const.LINK)(job_info.google_link)}\n"
+        + f"{bash_util.hex_color(const.DARKER)('-' * width)}\n"
         + bash_util.color_keywords(sql)
     )

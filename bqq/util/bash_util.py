@@ -3,6 +3,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+from typing import Tuple
 
 from bqq import const
 from bqq.types import JobInfo
@@ -26,11 +27,17 @@ def hex_color(hexstr: str, amount=1.0):
 
 
 def use_less(message: str) -> bool:
-    escaped = ansi_escape.sub("", message)
-    height = len(escaped.split("\n"))
-    width = len(max(escaped.split("\n")))
+    width, height = get_size(message)
     cols = shutil.get_terminal_size().columns
     return width > cols or height > const.MAX_LINES
+
+
+def get_size(message: str) -> Tuple[int, int]:
+    escaped = ansi_escape.sub("", message)
+    lines = escaped.split("\n")
+    height = len(lines)
+    width = len(max(lines, key=lambda x: len(x)))
+    return width, height
 
 
 def color_keywords(query: str) -> str:

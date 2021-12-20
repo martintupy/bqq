@@ -53,10 +53,10 @@ def get_header(job: QueryJob) -> str:
     size = bq_util.size_fmt(job.total_bytes_processed)
     cost = bq_util.price_fmt(job.total_bytes_processed)
     return (
-        bash_util.hex_color(const.TABLE_HEADER)("Billed project")
+        bash_util.hex_color(const.HEADER)("Billed project")
         + f" = {job.project}\n"
-        + bash_util.hex_color(const.TABLE_HEADER)("Processed size")
+        + bash_util.hex_color(const.HEADER)("Processed size")
         + f" = {size}\n"
-        + bash_util.hex_color(const.TABLE_HEADER)("Estimated cost")
+        + bash_util.hex_color(const.HEADER)("Estimated cost")
         + f" = {cost}"
     )
