@@ -1,4 +1,5 @@
-from typing import Optional
+from datetime import datetime, timedelta
+from typing import List, Optional
 
 import click
 from bqq import const, info, results
@@ -22,21 +23,38 @@ def dry_run(client: Client, query: str) -> Optional[QueryJob]:
 
 
 def run_query(client: Client, query: str) -> JobInfo:
-    q = client.query(query)
-    result = q.result()
-    job_id = q.job_id
-    project = q.project
-    location = q.location
-    created = q.created
-    bytes_billed = q.total_bytes_billed
-    slot_millis = q.slot_millis
-    cache_hit = q.cache_hit
-    header = [field.name for field in result.schema]
-    rows = list(result)
-    job_info = JobInfo(created, query, project, location, job_id, bytes_billed, cache_hit, slot_millis)
+    query_job = client.query(query)
+    write_result(query_job)  # extract result first
+    job_info = JobInfo.from_query_job(query_job)
     info.insert(job_info)
-    results.write(job_id, header, rows)
     return job_info
+
+
+def write_result(query_job: QueryJob):
+    result = query_job.result(page_size=1000)
+    job_id = query_job.job_id
+    header = [field.name for field in result.schema]
+    results.write(query_job.project, job_id, header, result)
+
+
+def download_result(job_id: str):
+    client = Client()
+    job = client.get_job(job_id)
+    if isinstance(job, QueryJob):
+        write_result(job)
+    else:
+        click.echo("Query job doesn't exist")
+
+
+def sync_history() -> List[JobInfo]:
+    client = Client()
+    days_ago = datetime.utcnow() - timedelta(days=const.HISTORY_DAYS)
+    jobs = client.list_jobs(min_creation_time=days_ago, state_filter="DONE")
+    with click.progressbar(jobs, label="Syncing jobs information") as js:
+        for job in js:
+            if isinstance(job, QueryJob):
+                job_info = JobInfo.from_query_job(job)
+                info.upsert(job_info)
 
 
 def call_api(yes: bool, query: str) -> Optional[JobInfo]:

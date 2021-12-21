@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Mapping
 from dateutil.relativedelta import relativedelta
+from google.cloud.bigquery.job.query import QueryJob
 
 
 @dataclass
@@ -14,6 +16,19 @@ class JobInfo:
     cache_hit: bool
     slot_millis: int
 
+    @staticmethod
+    def from_query_job(job: QueryJob):
+        return JobInfo(
+            created=job.created,
+            query=job.query,
+            project=job.project,
+            location=job.location,
+            job_id=job.job_id,
+            bytes_billed=job.total_bytes_billed,
+            cache_hit=job.cache_hit,
+            slot_millis=job.slot_millis,
+        )
+
     @property
     def created_fmt(self) -> str:
         return self.created.strftime("%Y-%m-%d %H:%M:%S")
@@ -25,7 +40,8 @@ class JobInfo:
 
     @property
     def slot_time(self) -> str:
-        rd = relativedelta(microseconds=self.slot_millis * 1000)
+        millis = self.slot_millis or 0
+        rd = relativedelta(microseconds=millis * 1000)
         parts = [
             f" {rd.days}d" if rd.days else "",
             f" {rd.hours}h" if rd.hours else "",
@@ -33,6 +49,19 @@ class JobInfo:
             f" {rd.seconds}sec" if rd.seconds else "",
         ]
         return "".join(parts).strip()
+
+    @property
+    def mapping(self) -> Mapping:
+        return {
+            "created": self.created.isoformat(),
+            "query": self.query,
+            "project": self.project,
+            "location": self.location,
+            "job_id": self.job_id,
+            "bytes_billed": self.bytes_billed,
+            "cache_hit": self.cache_hit,
+            "slot_millis": self.slot_millis,
+        }
 
 
 @dataclass

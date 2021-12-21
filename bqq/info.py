@@ -8,7 +8,7 @@ from bqq import const
 from bqq.types import JobInfo
 
 db = TinyDB(f"{const.BQQ_HOME}/db.json")
-Q = Query()
+JobInfoQuery = Query()
 
 
 def clear():
@@ -19,7 +19,7 @@ def clear():
 def find_date(date: str) -> Optional[JobInfo]:
     job_info = None
     try:
-        job_info = db.search(Q.date == date)[0]
+        job_info = db.search(JobInfoQuery.date == date)[0]
     except IndexError:
         job_info = None
     return job_info
@@ -44,17 +44,8 @@ def get_all() -> List[JobInfo]:
 
 
 def insert(info: JobInfo):
-    query = sqlparse.format(info.query, strip_comments=True)
-    min_query = " ".join(query.split())
-    db.insert(
-        {
-            "created": info.created.isoformat(),
-            "query": min_query,
-            "project": info.project,
-            "location": info.location,
-            "job_id": info.job_id,
-            "bytes_billed": info.bytes_billed,
-            "cache_hit": info.cache_hit,
-            "slot_millis": info.slot_millis,
-        }
-    )
+    db.insert(info.mapping)
+
+
+def upsert(info: JobInfo):
+    db.upsert(info.mapping, JobInfoQuery.job_id == info.job_id)

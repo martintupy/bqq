@@ -2,7 +2,7 @@ import re
 import shutil
 import subprocess
 import tempfile
-from typing import Tuple
+from typing import List, Tuple
 
 from bqq import const
 from prettytable.prettytable import PrettyTable
@@ -39,10 +39,13 @@ def use_less(message: str) -> bool:
     return width > cols or height > const.MAX_LINES
 
 
-def get_size(message: str) -> Tuple[int, int]:
+def escape_ansi(message: str) -> str:
     ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
-    escaped = ansi_escape.sub("", message)
-    lines = escaped.split("\n")
+    return ansi_escape.sub("", message)
+
+
+def get_size(message: str) -> Tuple[int, int]:
+    lines = escape_ansi(message).split("\n")
     height = len(lines)
     width = len(max(lines, key=lambda x: len(x)))
     return width, height
@@ -59,7 +62,8 @@ def color_keywords(query: str) -> str:
     return "".join(["".join(map(str, i)) for i in zip(spaces, words)])
 
 
-def fzf(choices: list):
+def fzf(choices: List[str]) -> str:
+    choices.sort(reverse=True, key=_fzf_key)
     choices_str = "\n".join(map(str, choices))
     selection = None
     with tempfile.NamedTemporaryFile() as input_file:
@@ -72,6 +76,11 @@ def fzf(choices: list):
             with open(output_file.name) as f:
                 selection = f.readline().strip("\n")
     return selection
+
+
+def _fzf_key(line: str) -> str:
+    escaped = escape_ansi(line)
+    return escaped.split(const.FZF_SEPARATOR)[0]
 
 
 def table() -> PrettyTable:

@@ -11,8 +11,12 @@ TIME = "D4BD1E"
 # -------- COLORS --------#
 
 BQQ_HOME = f"{Path.home()}/.bqq"
-BQQ_CSV = f"{BQQ_HOME}/csv"
+BQQ_RESULTS = f"{BQQ_HOME}/results"
 MAX_LINES = 400
+
+FZF_SEPARATOR = " ~ "
+
+HISTORY_DAYS = 30
 
 BQ_KEYWORDS = [
     "ALL",

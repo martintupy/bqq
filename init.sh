@@ -1,3 +1,3 @@
 #!/bin/sh
 
-mkdir -p "$HOME/.bqq/csv"
+mkdir -p "$HOME/.bqq/results"

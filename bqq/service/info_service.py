@@ -8,18 +8,18 @@ from tinydb.queries import Query
 
 
 def search() -> JobInfo:
-    sep = " ~ "
     results = []
     job_info = None
     rows = info.get_all()
     for row in rows:
-        date = bash_util.hex_color(const.TIME)(row.created_fmt)
-        query = bash_util.color_keywords(row.query)
+        created = bash_util.hex_color(const.TIME)(row.created_fmt)
+        query_min = " ".join(row.query.split())
+        query = bash_util.color_keywords(query_min)
         job_id = bash_util.hex_color(const.ID)(row.job_id)
-        result = sep.join([date, query, job_id])
+        result = const.FZF_SEPARATOR.join([created, query, job_id])
         results.append(result)
-    pick = bash_util.fzf(reversed(results))
-    result = pick.split(sep)
+    pick = bash_util.fzf(results)
+    result = pick.split(const.FZF_SEPARATOR)
     if len(result) == 3:
         job_id = result[2]
         job_info = next((row for row in rows if row.job_id == job_id), None)
@@ -36,7 +36,7 @@ def get_info(job_info: JobInfo) -> str:
         f"{bash_util.hex_color(const.INFO)('Slot time')} = {job_info.slot_time}",
         f"{bash_util.hex_color(const.INFO)('Console link')} = {console_link}",
     ]
-    info =  "\n".join(lines)
+    info = "\n".join(lines)
     width, _ = bash_util.get_size(info)
     result_lines = [
         f"{bash_util.hex_color(const.DARKER)('─' * width)}",

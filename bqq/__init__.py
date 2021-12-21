@@ -16,7 +16,8 @@ from bqq.util import bash_util
 @click.option("-y", "--yes", help="Automatic yes to prompt", is_flag=True)
 @click.option("-h", "--history", help="Search history", is_flag=True)
 @click.option("--clear", help="Clear history", is_flag=True)
-def cli(sql: str, file: str, yes: bool, history: bool, clear: bool):
+@click.option("--sync", help="Sync history from cloud", is_flag=True)
+def cli(sql: str, file: str, yes: bool, history: bool, clear: bool, sync: bool):
     """BiqQuery query."""
     job_info = None
     if file:
@@ -39,6 +40,8 @@ def cli(sql: str, file: str, yes: bool, history: bool, clear: bool):
             results.clear()
             click.echo("All past results cleared")
         ctx.exit()
+    elif sync:
+        bq_service.sync_history()
     else:
         ctx = click.get_current_context()
         click.echo(ctx.get_help())
@@ -47,7 +50,7 @@ def cli(sql: str, file: str, yes: bool, history: bool, clear: bool):
         sections = [
             info_service.get_info(job_info),
             info_service.get_sql(job_info),
-            results.read(job_info.job_id),
+            results.read(job_info),
         ]
         message = "\n".join(sections)
         if bash_util.use_less(message):
