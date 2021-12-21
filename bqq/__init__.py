@@ -44,12 +44,12 @@ def cli(sql: str, file: str, yes: bool, history: bool, clear: bool):
         click.echo(ctx.get_help())
         ctx.exit()
     if job_info:
-        lines = [
+        sections = [
             info_service.get_info(job_info),
             info_service.get_sql(job_info),
             results.read(job_info.job_id),
         ]
-        message = "\n".join(lines)
+        message = "\n".join(sections)
         if bash_util.use_less(message):
             os.environ["LESS"] += " -S"  # enable horizontal scrolling for less
             click.echo_via_pager(message)

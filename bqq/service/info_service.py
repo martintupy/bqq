@@ -36,15 +36,16 @@ def get_info(job_info: JobInfo) -> str:
         f"{bash_util.hex_color(const.INFO)('Slot time')} = {job_info.slot_time}",
         f"{bash_util.hex_color(const.INFO)('Console link')} = {console_link}",
     ]
-    return "\n".join(lines)
+    info =  "\n".join(lines)
+    width, _ = bash_util.get_size(info)
+    result_lines = [
+        f"{bash_util.hex_color(const.DARKER)('─' * width)}",
+        info,
+        f"{bash_util.hex_color(const.DARKER)('─' * width)}",
+    ]
+    return "\n".join(result_lines)
 
 
 def get_sql(job_info: JobInfo) -> str:
     sql = sqlparse.format(job_info.query, reindent=True)
-    width, _ = bash_util.get_size(sql)
-    lines = [
-        f"{bash_util.hex_color(const.DARKER)('─' * width)}",
-        f"{bash_util.color_keywords(sql)}",
-        f"{bash_util.hex_color(const.DARKER)('─' * width)}",
-    ]
-    return "\n".join(lines)
+    return bash_util.color_keywords(sql)

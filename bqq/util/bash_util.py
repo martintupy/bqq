@@ -7,8 +7,6 @@ from typing import Tuple
 from bqq import const
 from prettytable.prettytable import PrettyTable
 
-ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
-
 
 def rgb_fg(r: int, g: int, b: int):
     def inner(text: str) -> str:
@@ -42,6 +40,7 @@ def use_less(message: str) -> bool:
 
 
 def get_size(message: str) -> Tuple[int, int]:
+    ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
     escaped = ansi_escape.sub("", message)
     lines = escaped.split("\n")
     height = len(lines)
@@ -73,6 +72,7 @@ def fzf(choices: list):
             with open(output_file.name) as f:
                 selection = f.readline().strip("\n")
     return selection
+
 
 def table() -> PrettyTable:
     table = PrettyTable()
