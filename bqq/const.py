@@ -13,6 +13,7 @@ TIME = "D4BD1E"
 BQQ_HOME = f"{Path.home()}/.bqq"
 BQQ_RESULTS = f"{BQQ_HOME}/results"
 MAX_LINES = 400
+MAX_ROWS = 1_000
 
 FZF_SEPARATOR = " ~ "
 

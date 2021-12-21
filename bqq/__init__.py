@@ -52,7 +52,7 @@ def cli(sql: str, file: str, yes: bool, history: bool, clear: bool, sync: bool):
             info_service.get_sql(job_info),
             results.read(job_info),
         ]
-        message = "\n".join(sections)
+        message = "\n".join(filter(None, sections))
         if bash_util.use_less(message):
             os.environ["LESS"] += " -S"  # enable horizontal scrolling for less
             click.echo_via_pager(message)

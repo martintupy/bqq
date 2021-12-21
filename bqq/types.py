@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Mapping
+from typing import Mapping, Optional
 from dateutil.relativedelta import relativedelta
 from google.cloud.bigquery.job.query import QueryJob
+
+from bqq.util import bq_util
 
 
 @dataclass
@@ -38,6 +40,11 @@ class JobInfo:
         link = f"https://console.cloud.google.com/bigquery?project={self.project}&j=bq:{self.location}:{self.job_id}&page=queryresults"
         return link
 
+    @property
+    def price_fmt(self) -> str:
+        bytes = self.bytes_billed or 0
+        return bq_util.price_fmt(bytes)
+        
     @property
     def slot_time(self) -> str:
         millis = self.slot_millis or 0

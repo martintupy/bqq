@@ -31,10 +31,12 @@ def run_query(client: Client, query: str) -> JobInfo:
 
 
 def write_result(query_job: QueryJob):
-    result = query_job.result(page_size=1000)
-    job_id = query_job.job_id
-    header = [field.name for field in result.schema]
-    results.write(query_job.project, job_id, header, result)
+    try:
+        result = query_job.result(max_results=const.MAX_ROWS)
+        job_id = query_job.job_id
+        results.write(query_job.project, job_id, result)
+    except BadRequest as e:
+        click.echo(bash_util.hex_color(const.ERROR)(e.message), err=True)
 
 
 def download_result(job_id: str):

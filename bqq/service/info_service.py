@@ -28,11 +28,10 @@ def search() -> JobInfo:
 
 def get_info(job_info: JobInfo) -> str:
     cache_hit = "(cache hit)" if job_info.cache_hit else ""
-    query_cost = bq_util.price_fmt(job_info.bytes_billed)
     console_link = bash_util.hex_color(const.LINK)(job_info.google_link)
     lines = [
         f"{bash_util.hex_color(const.INFO)('Creation time')} = {job_info.created_fmt}",
-        f"{bash_util.hex_color(const.INFO)('Query cost')} = {query_cost} {cache_hit}",
+        f"{bash_util.hex_color(const.INFO)('Query cost')} = {job_info.price_fmt} {cache_hit}",
         f"{bash_util.hex_color(const.INFO)('Slot time')} = {job_info.slot_time}",
         f"{bash_util.hex_color(const.INFO)('Console link')} = {console_link}",
     ]
