@@ -2,6 +2,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import itertools
 from typing import List, Tuple
 
 from bqq import const
@@ -34,7 +35,9 @@ def hex_color(fg: str = None, bg: str = None):
 
 
 def use_less(message: str) -> bool:
-    width, height = get_size(message)
+    lines = escape_ansi(message).split("\n")
+    height = len(lines)
+    width = len(max(lines, key=lambda x: len(x)))
     cols = shutil.get_terminal_size().columns
     return width > cols or height > const.MAX_LINES
 
@@ -44,11 +47,12 @@ def escape_ansi(message: str) -> str:
     return ansi_escape.sub("", message)
 
 
-def get_size(message: str) -> Tuple[int, int]:
-    lines = escape_ansi(message).split("\n")
-    height = len(lines)
+def get_max_width(messages: List[str]) -> int:
+    lines2d = [escape_ansi(message).split("\n") for message in messages]
+    lines = list(itertools.chain(*lines2d))
     width = len(max(lines, key=lambda x: len(x)))
-    return width, height
+    cols = shutil.get_terminal_size().columns
+    return min(width, cols)
 
 
 def color_keywords(query: str) -> str:

@@ -9,5 +9,8 @@ def size_fmt(num: int) -> str:
 
 def price_fmt(num: int) -> str:
     tb = num / 1e12
-    price = round(tb * 5, 2)
-    return f"{price} $"
+    price = tb * 5
+    price_round = "{:.2f}".format(round(price, 2))
+    if price < 0.01 and price != 0:
+        price_round = f"+{price_round}"
+    return f"{price_round} $"
