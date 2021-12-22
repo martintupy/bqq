@@ -1,18 +1,15 @@
 from datetime import datetime, timedelta
-from types import resolve_bases
 from typing import List, Optional
 
 import click
-from bqq import const
+from bqq import const, output
 from bqq.bq_client import BqClient
 from bqq.infos import Infos
-from bqq.results import Results
 from bqq.service.result_service import ResultService
 from bqq.types import JobInfo, SearchLine
-from bqq.util import bash_util, bq_util
-from google.api_core.exceptions import BadRequest, NotFound
+from bqq.util import bash_util
+from google.api_core.exceptions import BadRequest
 from google.cloud.bigquery.job.query import QueryJob, QueryJobConfig
-from tinydb.queries import Query
 
 
 class InfoService:
@@ -74,7 +71,7 @@ class InfoService:
         if not skip:
             job = self.dry_run(query)
             if job:
-                click.echo(InfoService.get_dry_info_header(job))
+                click.echo(output.get_dry_info_header(job))
                 confirmed = click.confirm("Do you want to continue?", default=False)
         if confirmed:
             query_job = self.bq_client.client.query(query)
@@ -90,30 +87,3 @@ class InfoService:
             )
             self.infos.remove(job_info)
             click.echo(f"Job {job_info.job_id} deleted.")
-
-    @staticmethod
-    def get_dry_info_header(job: QueryJob) -> str:
-        size = bq_util.size_fmt(job.total_bytes_processed)
-        cost = bq_util.price_fmt(job.total_bytes_processed)
-        lines = [
-            f"{bash_util.hex_color(const.INFO)('Billing project')} = {job.project}",
-            f"{bash_util.hex_color(const.INFO)('Estimated size')} = {size}",
-            f"{bash_util.hex_color(const.INFO)('Estimated cost')} = {cost}",
-        ]
-        return "\n".join(lines)
-
-    @staticmethod
-    def get_info_header(job_info: JobInfo) -> str:
-        cache_hit = "(cache hit)" if job_info.cache_hit else ""
-        console_link = bash_util.hex_color(const.LINK)(job_info.google_link)
-        lines = [
-            f"{bash_util.hex_color(const.INFO)('Creation time')} = {job_info.created_fmt}",
-            f"{bash_util.hex_color(const.INFO)('Query cost')} = {job_info.price_fmt} {cache_hit}",
-            f"{bash_util.hex_color(const.INFO)('Slot time')} = {job_info.slot_time}",
-            f"{bash_util.hex_color(const.INFO)('Console link')} = {console_link}",
-        ]
-        return "\n".join(lines)
-
-    @staticmethod
-    def get_sql(job_info: JobInfo) -> str:
-        return bash_util.color_keywords(job_info.query)

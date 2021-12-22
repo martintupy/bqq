@@ -22,6 +22,7 @@ class JobInfo:
     cache_hit: bool
     slot_millis: int
     has_result: Optional[bool]
+    account: str
 
     @staticmethod
     def from_query_job(job: QueryJob):
@@ -35,6 +36,7 @@ class JobInfo:
             cache_hit=job.cache_hit,
             slot_millis=job.slot_millis,
             has_result=None,
+            account=job.user_email,
         )
 
     @staticmethod
@@ -49,6 +51,7 @@ class JobInfo:
             cache_hit=doc.get("cache_hit"),
             slot_millis=doc.get("slot_millis"),
             has_result=doc.get("has_result"),
+            account=doc.get("account"),
         )
 
     @property
@@ -89,6 +92,7 @@ class JobInfo:
             "cache_hit": self.cache_hit,
             "slot_millis": self.slot_millis,
             "has_result": self.has_result,
+            "account": self.account,
         }
 
 
