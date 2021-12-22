@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Mapping, Optional
 from dateutil.relativedelta import relativedelta
 from google.cloud.bigquery.job.query import QueryJob
+from dateutil import tz
 
 from bqq.util import bq_util
 
@@ -33,7 +34,7 @@ class JobInfo:
 
     @property
     def created_fmt(self) -> str:
-        return self.created.strftime("%Y-%m-%d %H:%M:%S")
+        return self.created.astimezone(tz.tzlocal()).strftime("%Y-%m-%d %H:%M:%S")
 
     @property
     def google_link(self) -> str:
@@ -44,7 +45,7 @@ class JobInfo:
     def price_fmt(self) -> str:
         bytes = self.bytes_billed or 0
         return bq_util.price_fmt(bytes)
-        
+
     @property
     def slot_time(self) -> str:
         millis = self.slot_millis or 0

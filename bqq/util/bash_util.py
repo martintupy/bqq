@@ -62,19 +62,21 @@ def color_keywords(query: str) -> str:
     return "".join(["".join(map(str, i)) for i in zip(spaces, words)])
 
 
-def fzf(choices: List[str]) -> str:
+def fzf(choices: List[str], multi=False) -> List[str]:
     choices.sort(reverse=True, key=_fzf_key)
     choices_str = "\n".join(map(str, choices))
-    selection = None
+    selection = []
+    multi = "--multi" if multi else None
+    fzf_args = filter(None, ["fzf", "--ansi", multi])
     with tempfile.NamedTemporaryFile() as input_file:
         with tempfile.NamedTemporaryFile() as output_file:
             input_file.write(choices_str.encode("utf-8"))
             input_file.flush()
             cat = subprocess.Popen(["cat", input_file.name], stdout=subprocess.PIPE)
-            subprocess.run(["fzf", "--ansi"], stdin=cat.stdout, stdout=output_file)
+            subprocess.run(fzf_args, stdin=cat.stdout, stdout=output_file)
             cat.wait()
             with open(output_file.name) as f:
-                selection = f.readline().strip("\n")
+                selection = [line.strip("\n") for line in f.readlines()]
     return selection
 
 
