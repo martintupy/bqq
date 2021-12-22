@@ -4,6 +4,7 @@ from typing import Mapping, Optional
 from dateutil.relativedelta import relativedelta
 from google.cloud.bigquery.job.query import QueryJob
 from dateutil import tz
+from tinydb.table import Document
 
 from bqq.util import bq_util
 
@@ -18,6 +19,7 @@ class JobInfo:
     bytes_billed: int
     cache_hit: bool
     slot_millis: int
+    has_result: Optional[bool]
 
     @staticmethod
     def from_query_job(job: QueryJob):
@@ -30,6 +32,21 @@ class JobInfo:
             bytes_billed=job.total_bytes_billed,
             cache_hit=job.cache_hit,
             slot_millis=job.slot_millis,
+            has_result=None,
+        )
+
+    @staticmethod
+    def from_document(doc: Document):
+        return JobInfo(
+            created=datetime.fromisoformat(doc["created"]),
+            query=doc.get("query"),
+            project=doc.get("project"),
+            location=doc.get("location"),
+            job_id=doc.get("job_id"),
+            bytes_billed=doc.get("bytes_billed"),
+            cache_hit=doc.get("cache_hit"),
+            slot_millis=doc.get("slot_millis"),
+            has_result=doc.get("has_result"),
         )
 
     @property
@@ -69,6 +86,7 @@ class JobInfo:
             "bytes_billed": self.bytes_billed,
             "cache_hit": self.cache_hit,
             "slot_millis": self.slot_millis,
+            "has_result": self.has_result,
         }
 
 

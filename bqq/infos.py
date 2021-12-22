@@ -16,29 +16,21 @@ class Infos:
         self.db.clear_cache()
         self.db.truncate()
 
-    def find_date(self, date: str) -> Optional[JobInfo]:
+    def find_by_id(self, job_id: str) -> Optional[JobInfo]:
         job_info = None
         try:
-            job_info = self.db.search(self.InfoQuery.date == date)[0]
+            job_info = JobInfo.from_document(self.db.search(self.InfoQuery.job_id == job_id)[0])
         except IndexError:
             job_info = None
         return job_info
 
+    def update_has_result(self, job_id: str, has_result: bool):
+        self.db.update({"has_result": has_result}, self.InfoQuery.job_id == job_id)
+
     def get_all(self) -> List[JobInfo]:
         all = []
         for row in self.db.all():
-            all.append(
-                JobInfo(
-                    created=datetime.fromisoformat(row["created"]),
-                    query=row.get("query"),
-                    project=row.get("project"),
-                    location=row.get("location"),
-                    job_id=row.get("job_id"),
-                    bytes_billed=row.get("bytes_billed"),
-                    cache_hit=row.get("cache_hit"),
-                    slot_millis=row.get("slot_millis"),
-                )
-            )
+            all.append(JobInfo.from_document(row))
         return all
 
     def insert(self, info: JobInfo):

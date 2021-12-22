@@ -28,7 +28,7 @@ def cli(sql: str, file: str, yes: bool, history: bool, delete: bool, clear: bool
     bq_client = BqClient()
     infos = Infos()
     results = Results()
-    result_service = ResultService(bq_client, results)
+    result_service = ResultService(bq_client, infos, results)
     info_service = InfoService(bq_client, result_service, infos)
     if file:
         query = file.read()
@@ -78,6 +78,7 @@ def cli(sql: str, file: str, yes: bool, history: bool, delete: bool, clear: bool
         result = results.read(job_info)
         if not result and click.confirm("Download result ?"):
             result_service.download_result(job_info.job_id)
+            job_info = infos.find_by_id(job_info.job_id) # updated job_info
             result = results.read(job_info)
         if result:
             if bash_util.use_less(result):
