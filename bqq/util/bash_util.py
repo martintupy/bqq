@@ -103,3 +103,11 @@ def table() -> PrettyTable:
     table.horizontal_char = hex_color(const.DARKER)("━")
     table.junction_char = hex_color(const.DARKER)("╋")
     return table
+
+
+class no_wrap:
+    def __enter__(self):
+        subprocess.run(["tput", "rmam"])
+
+    def __exit__(self, exception, value, tb):
+        subprocess.run(["tput", "smam"])

@@ -1,4 +1,5 @@
 import os
+import subprocess
 from typing import Optional, Tuple
 
 import click
@@ -10,7 +11,7 @@ from bqq.infos import Infos
 from bqq.results import Results
 from bqq.service.info_service import InfoService
 from bqq.service.result_service import ResultService
-from bqq.types import JobInfo
+from bqq.types import JobInfo, SearchLine
 from bqq.util import bash_util
 
 
@@ -43,10 +44,12 @@ def cli(sql: str, file: str, yes: bool, history: bool, delete: bool, clear: bool
         job_info = info_service.search_one()
     elif delete:
         infos = info_service.search()
-        click.echo("\n".join([info.job_id for info in infos]))
-        if click.confirm(f"Delete selected from history ?", default=True):
+        if infos:
+            with bash_util.no_wrap():
+                click.echo("\n".join([SearchLine.from_job_info(info).to_line for info in infos]))
             ctx = click.get_current_context()
-            info_service.delete_infos(infos)
+            delete = click.confirm(f"Delete selected from history ({len(infos)})?", default=False)
+            info_service.delete_infos(infos) if delete else click.echo(f"Nothing deleted.")
             ctx.exit()
     elif clear:
         ctx = click.get_current_context()
@@ -78,7 +81,7 @@ def cli(sql: str, file: str, yes: bool, history: bool, delete: bool, clear: bool
         result = results.read(job_info)
         if not result and click.confirm("Download result ?"):
             result_service.download_result(job_info.job_id)
-            job_info = infos.find_by_id(job_info.job_id) # updated job_info
+            job_info = infos.find_by_id(job_info.job_id)  # updated job_info
             result = results.read(job_info)
         if result:
             if bash_util.use_less(result):

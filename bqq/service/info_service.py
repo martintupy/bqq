@@ -8,7 +8,7 @@ from bqq.bq_client import BqClient
 from bqq.infos import Infos
 from bqq.results import Results
 from bqq.service.result_service import ResultService
-from bqq.types import JobInfo
+from bqq.types import JobInfo, SearchLine
 from bqq.util import bash_util, bq_util
 from google.api_core.exceptions import BadRequest, NotFound
 from google.cloud.bigquery.job.query import QueryJob, QueryJobConfig
@@ -22,41 +22,31 @@ class InfoService:
         self.result_service = result_service
 
     def search(self) -> List[JobInfo]:
-        results = []
         rows = self.infos.get_all()
+        choices = []
         for row in rows:
-            created = bash_util.hex_color(const.TIME)(row.created_fmt)
-            query_min = " ".join(row.query.split())
-            query = bash_util.color_keywords(query_min)
-            job_id = bash_util.hex_color(const.ID)(row.job_id)
-            result = const.FZF_SEPARATOR.join([created, query, job_id])
-            results.append(result)
-        selections = bash_util.fzf(results, multi=True)
+            search_line = SearchLine.from_job_info(row)
+            choices.append(search_line.to_line)
+        lines = bash_util.fzf(choices, multi=True)
         infos = []
-        for selection in selections:
-            result = selection.split(const.FZF_SEPARATOR)
-            if len(result) == 3:
-                job_id = result[2]
-                job_info = next((row for row in rows if row.job_id == job_id), None)
+        for line in lines:
+            search_line = SearchLine.from_line(line)
+            if search_line:
+                job_info = next((row for row in rows if row.job_id == search_line.job_id), None)
                 infos.append(job_info)
         return infos
 
     def search_one(self) -> JobInfo:
-        results = []
-        job_info = None
         rows = self.infos.get_all()
+        choices = []
         for row in rows:
-            created = bash_util.hex_color(const.TIME)(row.created_fmt)
-            query_min = " ".join(row.query.split())
-            query = bash_util.color_keywords(query_min)
-            job_id = bash_util.hex_color(const.ID)(row.job_id)
-            result = const.FZF_SEPARATOR.join([created, query, job_id])
-            results.append(result)
-        selection = bash_util.fzf(results)[0]
-        result = selection.split(const.FZF_SEPARATOR)
-        if len(result) == 3:
-            job_id = result[2]
-            job_info = next((row for row in rows if row.job_id == job_id), None)
+            search_line = SearchLine.from_job_info(row)
+            choices.append(search_line.to_line)
+        lines = bash_util.fzf(choices)
+        search_line = next((SearchLine.from_line(line) for line in lines), None)
+        job_info = None
+        if search_line:
+            job_info = next((row for row in rows if row.job_id == search_line.job_id), None)
         return job_info
 
     def sync_infos(self):

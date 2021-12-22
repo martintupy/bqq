@@ -1,12 +1,14 @@
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Mapping, Optional
+
+from dateutil import tz
 from dateutil.relativedelta import relativedelta
 from google.cloud.bigquery.job.query import QueryJob
-from dateutil import tz
 from tinydb.table import Document
 
-from bqq.util import bq_util
+from bqq import const
+from bqq.util import bash_util, bq_util
 
 
 @dataclass
@@ -91,7 +93,31 @@ class JobInfo:
 
 
 @dataclass
-class SearchResult:
+class SearchLine:
     created: str
     query: str
     job_id: str
+
+    @staticmethod
+    def from_line(line: str):
+        parts = line.split(const.FZF_SEPARATOR)
+        search_result = None
+        if len(parts) == 3:
+            search_result = SearchLine(
+                created=parts[0],
+                query=parts[1],
+                job_id=parts[2],
+            )
+        return search_result
+
+    @staticmethod
+    def from_job_info(job_info: JobInfo):
+        return SearchLine(
+            created=bash_util.hex_color(const.TIME)(job_info.created_fmt),
+            query=bash_util.color_keywords(" ".join(job_info.query.split())),
+            job_id=bash_util.hex_color(const.ID)(job_info.job_id),
+        )
+
+    @property
+    def to_line(self):
+        return const.FZF_SEPARATOR.join([self.created, self.query, self.job_id])
