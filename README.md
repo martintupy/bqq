@@ -29,8 +29,11 @@ Usage: bqq [OPTIONS] [SQL]
 Options:
   -f, --file FILENAME  File containing SQL
   -y, --yes            Automatic yes to prompt
-  -r, --results        Search past results
-  --clear              Clear all past results
+  -h, --history        Search history
+  -d, --delete         Delete job from history
+  -i, --info           Show gcloud configuration
+  --clear              Clear history
+  --sync               Sync history from cloud
   --help               Show this message and exit.
 ```
 
@@ -38,11 +41,9 @@ Options:
 
 ```bash
 bqq "SELECT repository.url, repository.created_at FROM bigquery-public-data.samples.github_nested LIMIT 100"
-+-------------------+----------------+----------------+
-|   Billed project  | Estimated cost | Estimated size |
-+-------------------+----------------+----------------+
-| my_google_project |      $0.0      |    157.6MB     |
-+-------------------+----------------+----------------+
+Billing project = my-google-project
+Estimated size = 150.3 MiB
+Estimated cost = +0.00 $
 Do you want to continue? [y/N]: y
 ```
 
