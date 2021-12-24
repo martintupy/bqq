@@ -1,6 +1,7 @@
-venv
-sql
-build
+venv/
+sql/
+build/
+dist/
 
 *.egg-info
 __pycache__
