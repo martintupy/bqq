@@ -25,9 +25,9 @@ def rgb_bg(r: int, g: int, b: int):
 
 def hex_color(fg: str = None, bg: str = None):
     def inner(text: str) -> str:
-        if fg:
+        if fg and not const.BQQ_DISABLE_COLORS:
             text = rgb_fg(*tuple(int(fg.lstrip("#")[i : i + 2], 16) for i in (0, 2, 4)))(text)
-        if bg:
+        if bg and not const.BQQ_DISABLE_COLORS:
             text = rgb_bg(*tuple(int(bg.lstrip("#")[i : i + 2], 16) for i in (0, 2, 4)))(text)
         return text
 
@@ -39,7 +39,7 @@ def use_less(message: str) -> bool:
     height = len(lines)
     width = len(max(lines, key=lambda x: len(x)))
     cols = shutil.get_terminal_size().columns
-    return width > cols or height > const.MAX_LINES
+    return width > cols or height > const.BQQ_MAX_LINES
 
 
 def escape_ansi(message: str) -> str:

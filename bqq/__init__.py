@@ -20,11 +20,12 @@ from bqq.util import bash_util
 @click.argument("sql", required=False)
 @click.option("-f", "--file", help="File containing SQL", type=click.File("r"))
 @click.option("-y", "--yes", help="Automatic yes to prompt", is_flag=True)
-@click.option("-h", "--history", help="Search history", is_flag=True)
-@click.option("-d", "--delete", help="Delete job from history", is_flag=True)
+@click.option("-h", "--history", help="Search local history", is_flag=True)
+@click.option("-d", "--delete", help="Delete job from history (local & cloud)", is_flag=True)
 @click.option("-i", "--info", help="Show gcloud configuration", is_flag=True)
-@click.option("--clear", help="Clear history", is_flag=True)
+@click.option("--clear", help="Clear local history", is_flag=True)
 @click.option("--sync", help="Sync history from cloud", is_flag=True)
+@click.version_option()
 def cli(
     sql: str, file: str, yes: bool, history: bool, delete: bool, clear: bool, sync: bool, info: bool
 ):

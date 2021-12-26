@@ -1,19 +1,25 @@
 from pathlib import Path
+import os
+import yaml
 
-# -------- COLORS --------#
-ERROR = "EB4920"
-DARKER = "545454"
-INFO = "58A33B"
-LINK = "7D9DC9"
-KEYWORD = "1C73E8"
-ID = "545454"
-TIME = "D4BD1E"
-# -------- COLORS --------#
+BQQ_HOME = os.environ.get("BQQ_HOME", f"{Path.home()}/.bqq")
+BQQ_RESULTS = os.environ.get("BQQ_RESULTS", f"{BQQ_HOME}/results")
 
-BQQ_HOME = f"{Path.home()}/.bqq"
-BQQ_RESULTS = f"{BQQ_HOME}/results"
-MAX_LINES = 400
-MAX_ROWS = 1_000
+BQQ_MAX_LINES = os.environ.get("BQQ_MAX_LINES", 400)
+BQQ_MAX_RESULT_ROWS = os.environ.get("BQQ_MAX_RESULT_ROWS", 1_000)
+
+BQQ_DISABLE_COLORS = os.getenv("BQQ_DISABLE_COLORS", "False").lower() in ("true", "1", "t")
+default_skin = os.path.join(os.path.dirname(__file__), "default-skin.yaml")
+BQQ_SKIN = os.environ.get("BQQ_SKIN", default_skin)
+
+skin: dict = yaml.safe_load(open(BQQ_SKIN, "r"))
+ERROR = skin.get("bqq", {}).get("error")
+DARKER = skin.get("bqq", {}).get("darker")
+INFO = skin.get("bqq", {}).get("info")
+LINK = skin.get("bqq", {}).get("link")
+KEYWORD = skin.get("bqq", {}).get("keyword")
+ID = skin.get("bqq", {}).get("id")
+TIME = skin.get("bqq", {}).get("time")
 
 FZF_SEPARATOR = " ~ "
 

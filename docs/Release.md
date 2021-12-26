@@ -1,6 +1,6 @@
 # Creating a Source Distribution
 
 ```bash
-python setup.py sdist --formats=gztar,zip
+python3 setup.py sdist --formats=gztar,zip
 ```
 
