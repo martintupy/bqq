@@ -1,15 +1,22 @@
 # BigQuery query - bqq 
-> "Simplified `bq query`"
+> "Simplified, enriched `bq query`"
 
-- prompted queries (billed project, cost, size) using dry run
+- prompted queries (billed project, cost, size), using dry run
 - synchronize jobs from cloud (results linked with console.cloud.google.com)
 - super fast search of query job history
-- download result data
+- download and preview result data
 
 ## Requirements
+- python >= 3.6
 
 - fzf - https://github.com/junegunn/fzf (required)
+```bash
+brew install fzf
+```
 - gcloud - https://cloud.google.com/sdk/docs/install (recommended)
+```bash
+brew install --cask google-cloud-sdk
+```
 
 ## Installation
 
@@ -22,12 +29,18 @@ pip install bqq
 - Using [latest release](https://github.com/martintupy/bqq/releases/latest)
 
 ```bash
-python3 -m pip install https://github.com/martintupy/bqq/releases/latest/download/bqq.tar.gz
+pip install https://github.com/martintupy/bqq/releases/latest/download/bqq.tar.gz
 ```
 
 ## Usage
 
-Underlying BigQuery client relies on [application-default](https://cloud.google.com/sdk/gcloud/reference/auth/application-default) credentials. Set up them first
+Underlying BigQuery client relies on [application-default](https://cloud.google.com/sdk/gcloud/reference/auth/application-default) credentials. Set them up first.
+
+```bash
+gcloud auth application-default login
+```
+
+## Examples
 
 ```
 Usage: bqq [OPTIONS] [SQL]
@@ -45,7 +58,6 @@ Options:
   --help               Show this message and exit.
 ```
 
-## Examples
 
 Query 
 ```bash
