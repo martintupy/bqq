@@ -1,3 +1,3 @@
 #!/bin/sh
 
-python3 setup.py sdist --formats=gztar,zip
+python3 -m build
