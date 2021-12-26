@@ -1,24 +1,33 @@
-# BigQuery query - bqq
+# BigQuery query - bqq 
+> "Simplified `bq query`"
 
-Simple BigQuery CLI:
-
-- dry run first (billed project, cost, size)
+- prompted queries (billed project, cost, size) using dry run
+- synchronize jobs from cloud (results linked with console.cloud.google.com)
+- super fast search of query job history
 - download result data
-- synchronize jobs from cloud
-- quick search through job history
 
 ## Requirements
 
-- fzf - https://github.com/junegunn/fzf
-- gcloud - https://cloud.google.com/sdk/docs/install
+- fzf - https://github.com/junegunn/fzf (required)
+- gcloud - https://cloud.google.com/sdk/docs/install (recommended)
 
 ## Installation
 
-- Using latest [release](https://github.com/martintupy/bqq/releases/latest)
+- Using [pypi](https://pypi.org/project/bqq/)
 
-    ```bash
-    python3 -m pip install https://github.com/martintupy/bqq/releases/latest/download/bqq.tar.gz
-    ```
+```bash
+pip install bqq
+```
+
+- Using [latest release](https://github.com/martintupy/bqq/releases/latest)
+
+```bash
+python3 -m pip install https://github.com/martintupy/bqq/releases/latest/download/bqq.tar.gz
+```
+
+## Usage
+
+Underlying BigQuery client relies on [application-default](https://cloud.google.com/sdk/gcloud/reference/auth/application-default) credentials. Set up them first
 
 ```
 Usage: bqq [OPTIONS] [SQL]
