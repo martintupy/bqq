@@ -14,7 +14,13 @@ twine check dist/*
 ## Test upload 
 
 ```bash
-twine upload -r testpypi dist/*
+twine upload --repository testpypi dist/*
+```
+
+## Test install
+
+```bash
+ python3 -m pip install --index-url https://test.pypi.org/simple/ bqq
 ```
 
 

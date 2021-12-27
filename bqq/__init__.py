@@ -1,9 +1,10 @@
+import json
 import os
 import subprocess
+from pathlib import Path
 from typing import Optional, Tuple
 
 import click
-import json
 from google.cloud.bigquery import Client
 
 from bqq import const, output
@@ -14,6 +15,11 @@ from bqq.service.info_service import InfoService
 from bqq.service.result_service import ResultService
 from bqq.types import JobInfo, SearchLine
 from bqq.util import bash_util
+
+
+def init():
+    Path(const.BQQ_HOME).mkdir(exist_ok=True)
+    Path(const.BQQ_RESULTS).mkdir(exist_ok=True)
 
 
 @click.command()
@@ -30,6 +36,7 @@ def cli(
     sql: str, file: str, yes: bool, history: bool, delete: bool, clear: bool, sync: bool, info: bool
 ):
     """BiqQuery query."""
+    init()
     job_info = None
     bq_client = BqClient()
     infos = Infos()
