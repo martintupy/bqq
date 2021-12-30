@@ -2,7 +2,7 @@ import csv
 import glob
 import os
 from pathlib import Path
-from typing import Optional, Union
+from typing import Union
 import shutil
 
 from google.cloud.bigquery.table import RowIterator
@@ -10,7 +10,6 @@ from rich import box
 
 from bqq import const
 from bqq.types import JobInfo
-from bqq.util import bash_util
 from rich.table import Table, Text
 
 

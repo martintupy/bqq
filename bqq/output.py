@@ -1,5 +1,3 @@
-from typing import List
-
 from google.cloud.bigquery.job.query import QueryJob
 from rich.console import Group
 from rich.text import Text

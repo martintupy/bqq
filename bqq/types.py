@@ -5,7 +5,7 @@ from typing import Mapping, Optional
 from dateutil import tz
 from dateutil.relativedelta import relativedelta
 from google.cloud.bigquery.job.query import QueryJob
-from rich.console import Console, Group
+from rich.console import Console
 from rich.text import Text
 from tinydb.table import Document
 

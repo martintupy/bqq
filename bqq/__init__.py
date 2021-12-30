@@ -2,10 +2,9 @@ import json
 import os
 import subprocess
 from pathlib import Path
-from rich.console import Console, Group
+from rich.console import Console
 
 import click
-from rich.text import Text
 
 from bqq import const, output
 from bqq.bq_client import BqClient
@@ -13,10 +12,7 @@ from bqq.infos import Infos
 from bqq.results import Results
 from bqq.service.info_service import InfoService
 from bqq.service.result_service import ResultService
-from bqq.types import JobInfo, SearchLine
-from bqq.util import bash_util
-from rich.prompt import Prompt, Confirm
-from rich.panel import Panel
+from rich.prompt import Confirm
 
 
 def init():

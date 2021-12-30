@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import List, Optional
 
 from tinydb import Query, TinyDB
