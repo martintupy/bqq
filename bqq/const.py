@@ -1,6 +1,8 @@
 from pathlib import Path
 import os
 import yaml
+from rich.style import Style
+from rich.theme import Theme
 
 BQQ_HOME = os.environ.get("BQQ_HOME", f"{Path.home()}/.bqq")
 BQQ_RESULTS = os.environ.get("BQQ_RESULTS", f"{BQQ_HOME}/results")
@@ -20,6 +22,23 @@ LINK = skin.get("bqq", {}).get("link")
 KEYWORD = skin.get("bqq", {}).get("keyword")
 ID = skin.get("bqq", {}).get("id")
 TIME = skin.get("bqq", {}).get("time")
+
+error_style = Style(color=ERROR)
+darker_style = Style(color=DARKER)
+info_style = Style(color=INFO)
+link_style = Style(color=LINK)
+keyword_style = Style(color=KEYWORD)
+id_style = Style(color=ID)
+time_style = Style(color=TIME)
+
+theme = Theme(
+    {
+        "progress.elapsed": "dim",
+        "prompt.default": "dim",
+        "prompt.choices": "none",
+        "rule.line": "dim",
+    }
+)
 
 FZF_SEPARATOR = " ~ "
 

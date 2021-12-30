@@ -1,12 +1,12 @@
+import itertools
 import re
 import shutil
 import subprocess
 import tempfile
-import itertools
 from typing import List, Tuple
 
 from bqq import const
-from prettytable.prettytable import PrettyTable
+from rich.text import Text
 
 
 def rgb_fg(r: int, g: int, b: int):
@@ -55,15 +55,11 @@ def get_max_width(messages: List[str]) -> int:
     return min(width, cols)
 
 
-def color_keywords(query: str) -> str:
-    spaces = re.compile("[^\s]+").split(query)
-    words = []
-    for word in query.split():
-        if word in const.BQ_KEYWORDS:
-            words.append(hex_color(const.KEYWORD)(word))
-        else:
-            words.append(word)
-    return "".join(["".join(map(str, i)) for i in zip(spaces, words)])
+def color_keywords(query: str) -> Text:
+    text = Text(query)
+    words = "|".join(const.BQ_KEYWORDS)
+    text.highlight_regex(f"({words})\s+", const.keyword_style)
+    return text
 
 
 def fzf(choices: List[str], multi=False) -> List[str]:
@@ -87,22 +83,6 @@ def fzf(choices: List[str], multi=False) -> List[str]:
 def _fzf_key(line: str) -> str:
     escaped = escape_ansi(line)
     return escaped.split(const.FZF_SEPARATOR)[0]
-
-
-def table() -> PrettyTable:
-    table = PrettyTable()
-    table.top_junction_char = hex_color(const.DARKER)("┳")
-    table.top_left_junction_char = hex_color(const.DARKER)("┏")
-    table.top_right_junction_char = hex_color(const.DARKER)("┓")
-    table.bottom_junction_char = hex_color(const.DARKER)("┻")
-    table.bottom_left_junction_char = hex_color(const.DARKER)("┗")
-    table.bottom_right_junction_char = hex_color(const.DARKER)("┛")
-    table.left_junction_char = hex_color(const.DARKER)("┣")
-    table.right_junction_char = hex_color(const.DARKER)("┫")
-    table.vertical_char = hex_color(const.DARKER)("┃")
-    table.horizontal_char = hex_color(const.DARKER)("━")
-    table.junction_char = hex_color(const.DARKER)("╋")
-    return table
 
 
 class no_wrap:

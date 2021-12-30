@@ -1,30 +1,30 @@
 # Release
 
-## Build
+## 1. Build
 ```bash
 python3 -m build
 ```
 
-## Check 
+## 2. Check 
 
 ```bash
 twine check dist/*
 ```
 
-## Test upload 
+## 3. Test upload 
 
 ```bash
 twine upload --repository testpypi dist/*
 ```
 
-## Test install
+## 4. Test install
 
 ```bash
  python3 -m pip install --index-url https://test.pypi.org/simple/ bqq
 ```
 
 
-## Upload 
+## 5. Upload 
 
 ```bash
 twine upload dist/*

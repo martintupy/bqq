@@ -2,10 +2,10 @@ import json
 import os
 import subprocess
 from pathlib import Path
-from typing import Optional, Tuple
+from rich.console import Console, Group
 
 import click
-from google.cloud.bigquery import Client
+from rich.text import Text
 
 from bqq import const, output
 from bqq.bq_client import BqClient
@@ -15,6 +15,8 @@ from bqq.service.info_service import InfoService
 from bqq.service.result_service import ResultService
 from bqq.types import JobInfo, SearchLine
 from bqq.util import bash_util
+from rich.prompt import Prompt, Confirm
+from rich.panel import Panel
 
 
 def init():
@@ -32,17 +34,16 @@ def init():
 @click.option("--clear", help="Clear local history", is_flag=True)
 @click.option("--sync", help="Sync history from cloud", is_flag=True)
 @click.version_option()
-def cli(
-    sql: str, file: str, yes: bool, history: bool, delete: bool, clear: bool, sync: bool, info: bool
-):
+def cli(sql: str, file: str, yes: bool, history: bool, delete: bool, clear: bool, sync: bool, info: bool):
     """BiqQuery query."""
     init()
     job_info = None
-    bq_client = BqClient()
+    console = Console(theme=const.theme)
+    bq_client = BqClient(console)
     infos = Infos()
     results = Results()
-    result_service = ResultService(bq_client, infos, results)
-    info_service = InfoService(bq_client, result_service, infos)
+    result_service = ResultService(console, bq_client, infos, results)
+    info_service = InfoService(console, bq_client, result_service, infos)
     ctx = click.get_current_context()
     if file:
         query = file.read()
@@ -58,43 +59,47 @@ def cli(
     elif delete:
         infos = info_service.search()
         if infos:
-            with bash_util.no_wrap():
-                click.echo("\n".join([SearchLine.from_job_info(info).to_line for info in infos]))
-            delete = click.confirm(f"Delete selected from history ({len(infos)})?", default=False)
-            info_service.delete_infos(infos) if delete else click.echo(f"Nothing deleted.")
+            if Confirm.ask(f"Delete selected ({len(infos)})?", default=True, console=console):
+                info_service.delete_infos(infos)
+            else:
+                console.print(f"Nothing deleted.")
             ctx.exit()
     elif clear:
         size = len(infos.get_all())
-        if click.confirm(f"Clear history ({size})?", default=False):
+        if Confirm.ask(f"Clear all ({size})?", default=False, console=console):
             infos.clear()
             results.clear()
-            click.echo("All past results cleared")
+            console.print("All cleared.")
         ctx.exit()
     elif sync:
         info_service.sync_infos()
     elif info:
         out = subprocess.check_output(["gcloud", "info", "--format=json"])
         gcloud_info = output.get_gcloud_info(json.loads(out))
-        click.echo(gcloud_info)
+        console.print(gcloud_info)
         ctx.exit()
     else:
-        click.echo(ctx.get_help())
+        console.print(ctx.get_help())
         ctx.exit()
     if job_info:
-        info_header = output.get_info_header(job_info)
+        header = output.get_info_header(job_info)
+        console.rule()
+        console.print(header)
+        console.rule()
         sql = output.get_sql(job_info)
-        width = bash_util.get_max_width([info_header, sql])
-        line = bash_util.hex_color(const.DARKER)("─" * width)
-        lines = [line, info_header, line, sql, line]
-        click.echo("\n".join(lines))
+        console.print(sql)
+        console.rule()
         result = results.read(job_info)
-        if not result and click.confirm("Download result ?"):
-            result_service.download_result(job_info.job_id)
-            job_info = infos.find_by_id(job_info.job_id)  # updated job_info
-            result = results.read(job_info)
+        if not result and job_info.has_result is None:
+            if Confirm.ask("Download result?", default=False, console=console):
+                result_service.download_result(job_info.job_id)
+                job_info = infos.find_by_id(job_info.job_id)  # updated job_info
+                result = results.read(job_info)
+        if job_info.has_result is False:
+            console.print("Query result has expired", style=const.error_style)
+            console.rule()
+            if Confirm.ask("Re-execute query?", default=False, console=console):
+                job_info = info_service.get_info(True, job_info.query)
+                result = results.read(job_info)
         if result:
-            if bash_util.use_less(result):
-                os.environ["LESS"] += " -S"  # enable horizontal scrolling for less
-                click.echo_via_pager(result)
-            else:
-                click.echo(result)
+            console.print(result)

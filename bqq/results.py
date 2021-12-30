@@ -2,14 +2,16 @@ import csv
 import glob
 import os
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 import shutil
 
 from google.cloud.bigquery.table import RowIterator
+from rich import box
 
 from bqq import const
 from bqq.types import JobInfo
 from bqq.util import bash_util
+from rich.table import Table, Text
 
 
 class Results:
@@ -35,19 +37,18 @@ class Results:
             for row in rows:
                 writer.writerow(row)
 
-    def read(self, job_info: JobInfo) -> Optional[str]:
+    def read(self, job_info: JobInfo) -> Union[None, Text, Table]:
         filename = f"{const.BQQ_RESULTS}/{job_info.project}/{job_info.job_id}.csv"
         result = None
-        if job_info.has_result is False:
-            result = bash_util.hex_color(const.ERROR)("Query result has expired")
         if os.path.isfile(filename):
-            table = bash_util.table()
+            table = Table(box=box.ROUNDED, border_style="dim")
             with open(filename) as f:
                 reader = csv.reader(f, delimiter=",")
                 header = reader.__next__()
-                table.field_names = header
-                for row in reader:
-                    table.add_row(row)
-            table.align = "l"
-            result = table.get_string()
+                table.add_column()
+                for col in header:
+                    table.add_column(col)
+                for i, row in enumerate(reader):
+                    table.add_row(Text(f"{i}", style="dim"), *row)
+            result = table
         return result

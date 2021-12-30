@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 
 import click
+from rich.prompt import Confirm
 from bqq import const, output
 from bqq.bq_client import BqClient
 from bqq.infos import Infos
@@ -10,10 +11,14 @@ from bqq.types import JobInfo, SearchLine
 from bqq.util import bash_util
 from google.api_core.exceptions import BadRequest
 from google.cloud.bigquery.job.query import QueryJob, QueryJobConfig
+from rich.console import Console
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn, track
+from rich.text import Text
 
 
 class InfoService:
-    def __init__(self, bq_client: BqClient, result_service: ResultService, infos: Infos) -> None:
+    def __init__(self, console: Console, bq_client: BqClient, result_service: ResultService, infos: Infos) -> None:
+        self.console = console
         self.infos = infos
         self.bq_client = bq_client
         self.result_service = result_service
@@ -23,7 +28,7 @@ class InfoService:
         choices = []
         for row in rows:
             search_line = SearchLine.from_job_info(row)
-            choices.append(search_line.to_line)
+            choices.append(search_line.to_line(self.console))
         lines = bash_util.fzf(choices, multi=True)
         infos = []
         for line in lines:
@@ -38,7 +43,7 @@ class InfoService:
         choices = []
         for row in rows:
             search_line = SearchLine.from_job_info(row)
-            choices.append(search_line.to_line)
+            choices.append(search_line.to_line(self.console))
         lines = bash_util.fzf(choices)
         search_line = next((SearchLine.from_line(line) for line in lines), None)
         job_info = None
@@ -49,11 +54,25 @@ class InfoService:
     def sync_infos(self):
         days_ago = datetime.utcnow() - timedelta(days=const.HISTORY_DAYS)
         jobs = self.bq_client.client.list_jobs(min_creation_time=days_ago, state_filter="DONE")
-        with click.progressbar(jobs, label="Syncing jobs information") as js:
-            for job in js:
+        size = 0
+        with Progress(
+            TextColumn("[progress.description]{task.description}", style=const.info_style),
+            "•",
+            TextColumn("[progress.completed]{task.completed}"),
+            "•",
+            TimeElapsedColumn(),
+            console=self.console,
+        ) as progress:
+            task = progress.add_task("Synchronizing jobs")
+            a = progress.get_time
+            for job in jobs:
                 if isinstance(job, QueryJob):
                     job_info = JobInfo.from_query_job(job)
+                    progress.advance(task)
+                    size += 1
                     self.infos.upsert(job_info)
+        text = Text("Jobs synchronized", style=const.info_style)
+        self.console.print(text, f" • {size}")
 
     def dry_run(self, query: str) -> Optional[QueryJob]:
         job_config = QueryJobConfig()
@@ -62,7 +81,7 @@ class InfoService:
         try:
             job = self.bq_client.client.query(query, job_config=job_config)
         except BadRequest as e:
-            click.echo(bash_util.hex_color(const.ERROR)(e.message), err=True)
+            self.console.print(e.message, style=const.error_style)
         return job
 
     def get_info(self, skip: bool, query: str) -> JobInfo:
@@ -71,8 +90,9 @@ class InfoService:
         if not skip:
             job = self.dry_run(query)
             if job:
-                click.echo(output.get_dry_info_header(job))
-                confirmed = click.confirm("Do you want to continue?", default=False)
+                headers = output.get_dry_info_header(job)
+                self.console.print(headers)
+                confirmed = Confirm.ask("Do you want to continue?", default=False, console=self.console)
         if confirmed:
             query_job = self.bq_client.client.query(query)
             self.result_service.write_result(query_job)  # extract result before job info
@@ -86,4 +106,4 @@ class InfoService:
                 job_id=job_info.job_id, project=job_info.project, location=job_info.location
             )
             self.infos.remove(job_info)
-            click.echo(f"Job {job_info.job_id} deleted.")
+            self.console.print(f"Job {job_info.job_id} deleted.")

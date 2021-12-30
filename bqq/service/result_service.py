@@ -1,7 +1,5 @@
-from datetime import datetime, timedelta
-from typing import List, Optional
-
 import click
+from rich.console import Console
 from bqq import const
 from bqq.bq_client import BqClient
 from bqq.infos import Infos
@@ -11,7 +9,8 @@ from google.cloud.bigquery.job.query import QueryJob
 
 
 class ResultService:
-    def __init__(self, bq_client: BqClient, infos: Infos, results: Results):
+    def __init__(self, console: Console, bq_client: BqClient, infos: Infos, results: Results):
+        self.console = console
         self.bq_client = bq_client
         self.infos = infos
         self.results = results
@@ -28,4 +27,4 @@ class ResultService:
         if isinstance(job, QueryJob):
             self.write_result(job)
         else:
-            click.echo("Query job doesn't exist")
+            self.console.print("Query job doesn't exist")

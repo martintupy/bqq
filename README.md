@@ -3,7 +3,7 @@
 
 - prompted queries (billed project, cost, size), using dry run
 - synchronize jobs from cloud (results linked with console.cloud.google.com)
-- super fast search of query job history
+- super fast search through query job history
 - download and preview result data
 
 ## Requirements
@@ -82,16 +82,16 @@ Syncing jobs information  [####################################]
 Search history
 ```
 bqq -h
-────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 Creation time = 2020-01-01 00:00:00
 Project = my-google-project
 Account = account@google.com
 Query cost = +0.00 $
 Slot time =
 Console link = https://console.cloud.google.com/bigquery?project=my-google-project&j=bq:US:3ff1f9b0-ae38-4d83-a711-7f28f74ff769&page=queryresults
-─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 SELECT repository.url, repository.created_at FROM bigquery-public-data.samples.github_nested LIMIT 100
-─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 Download result ? [y/N]:
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃ url                                                            ┃ created_at                ┃

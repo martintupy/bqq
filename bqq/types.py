@@ -5,6 +5,8 @@ from typing import Mapping, Optional
 from dateutil import tz
 from dateutil.relativedelta import relativedelta
 from google.cloud.bigquery.job.query import QueryJob
+from rich.console import Console, Group
+from rich.text import Text
 from tinydb.table import Document
 
 from bqq import const
@@ -98,9 +100,9 @@ class JobInfo:
 
 @dataclass
 class SearchLine:
-    created: str
-    query: str
-    job_id: str
+    created: Text
+    query: Text
+    job_id: Text
 
     @staticmethod
     def from_line(line: str):
@@ -117,11 +119,13 @@ class SearchLine:
     @staticmethod
     def from_job_info(job_info: JobInfo):
         return SearchLine(
-            created=bash_util.hex_color(const.TIME)(job_info.created_fmt),
+            created=Text(job_info.created_fmt, style=const.time_style),
             query=bash_util.color_keywords(" ".join(job_info.query.split())),
-            job_id=bash_util.hex_color(const.ID)(job_info.job_id),
+            job_id=Text(job_info.job_id, style="dim"),
         )
 
-    @property
-    def to_line(self):
-        return const.FZF_SEPARATOR.join([self.created, self.query, self.job_id])
+    def to_line(self, console: Console) -> str:
+        segments = Text.assemble(
+            self.created, Text(const.FZF_SEPARATOR), self.query, Text(const.FZF_SEPARATOR), self.job_id
+        ).render(console)
+        return console._render_buffer(segments)
