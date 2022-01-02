@@ -9,7 +9,13 @@ from bqq.types import JobInfo
 class Infos:
     def __init__(self) -> None:
         self.InfoQuery = Query()
-        self.db = TinyDB(f"{const.BQQ_HOME}/infos.json")
+        self._db = None
+
+    @property
+    def db(self):
+        if not self._db:
+            self._db = TinyDB(const.BQQ_INFOS)
+        return self._db
 
     def clear(self):
         self.db.clear_cache()

@@ -2,7 +2,7 @@ import csv
 import glob
 import os
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional
 import shutil
 
 from google.cloud.bigquery.table import RowIterator

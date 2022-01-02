@@ -1,11 +1,10 @@
 from datetime import datetime, timedelta
 from typing import List, Optional
 
-import click
 from rich.prompt import Confirm
 from bqq import const, output
 from bqq.bq_client import BqClient
-from bqq.infos import Infos
+from bqq.data.infos import Infos
 from bqq.service.result_service import ResultService
 from bqq.types import JobInfo, SearchLine
 from bqq.util import bash_util

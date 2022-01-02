@@ -2,8 +2,8 @@ import click
 from rich.console import Console
 from bqq import const
 from bqq.bq_client import BqClient
-from bqq.infos import Infos
-from bqq.results import Results
+from bqq.data.infos import Infos
+from bqq.data.results import Results
 from google.api_core.exceptions import BadRequest, NotFound
 from google.cloud.bigquery.job.query import QueryJob
 

@@ -2,23 +2,19 @@ import json
 import os
 import subprocess
 from pathlib import Path
-from rich.console import Console
 
 import click
+from rich.console import Console, Group, NewLine
+from rich.prompt import Confirm, Prompt
 from rich.text import Text
+from rich.panel import Panel
 
 from bqq import const, output
 from bqq.bq_client import BqClient
-from bqq.infos import Infos
-from bqq.results import Results
+from bqq.data.infos import Infos
+from bqq.data.results import Results
 from bqq.service.info_service import InfoService
 from bqq.service.result_service import ResultService
-from rich.prompt import Confirm
-
-
-def init():
-    Path(const.BQQ_HOME).mkdir(exist_ok=True)
-    Path(const.BQQ_RESULTS).mkdir(exist_ok=True)
 
 
 @click.command()
@@ -30,11 +26,10 @@ def init():
 @click.option("-i", "--info", help="Show gcloud configuration", is_flag=True)
 @click.option("--clear", help="Clear local history", is_flag=True)
 @click.option("--sync", help="Sync history from cloud", is_flag=True)
+@click.option("--init", help="Initialize bqq environment", is_flag=True)
 @click.version_option()
-def cli(sql: str, file: str, yes: bool, history: bool, delete: bool, clear: bool, sync: bool, info: bool):
+def cli(sql: str, file: str, yes: bool, history: bool, delete: bool, clear: bool, sync: bool, init: bool, info: bool):
     """BiqQuery query."""
-    init()
-    job_info = None
     console = Console(theme=const.theme)
     bq_client = BqClient(console)
     infos = Infos()
@@ -42,7 +37,22 @@ def cli(sql: str, file: str, yes: bool, history: bool, delete: bool, clear: bool
     result_service = ResultService(console, bq_client, infos, results)
     info_service = InfoService(console, bq_client, result_service, infos)
     ctx = click.get_current_context()
-    if file:
+    job_info = None
+    if init:
+        initialize(console)
+        ctx.exit()
+    elif not os.path.exists(const.BQQ_HOME):
+        console.print(
+            Panel(
+                title="Not initialized, run",
+                renderable=Text("bqq --init"),
+                expand=False,
+                padding=(1, 3),
+                border_style=const.warning_style,
+            )
+        )
+        ctx.exit()
+    elif file:
         query = file.read()
         job_info = info_service.get_info(yes, query)
     elif sql and os.path.isfile(sql):
@@ -107,3 +117,32 @@ def cli(sql: str, file: str, yes: bool, history: bool, delete: bool, clear: bool
                     console.print(result, crop=False)
             else:
                 console.print(result, crop=False)
+
+
+def initialize(console: Console):
+    bqq_home = Prompt.ask("Enter bqq home path", default=const.DEFAULT_BQQ_HOME, console=console)
+    bqq_results = f"{bqq_home}/results"
+    bqq_infos = f"{bqq_home}/infos.json"
+    bqq_config = f"{bqq_home}/config.yaml"
+
+    Path(bqq_home).mkdir(parents=True, exist_ok=True)
+    console.print(f"created - {bqq_home}")
+    Path(bqq_results).mkdir(parents=True, exist_ok=True)
+    console.print(f"created - {bqq_results}")
+    Path(bqq_infos).touch()
+    console.print(f"created - {bqq_infos}")
+    Path(bqq_config).touch()
+    console.print(f"created - {bqq_config}")
+
+    if bqq_home != const.DEFAULT_BQQ_HOME:
+        group = Group(Text(f"export BQQ_HOME={bqq_home}"))
+        console.print(
+            NewLine(),
+            Panel(
+                title="Export following to your environment",
+                renderable=group,
+                expand=False,
+                padding=(1, 3),
+                border_style=const.warning_style,
+            ),
+        )

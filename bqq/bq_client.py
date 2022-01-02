@@ -1,6 +1,5 @@
 from google.cloud.bigquery import Client
 from rich.console import Console
-from bqq import const
 
 
 class BqClient:
@@ -11,6 +10,6 @@ class BqClient:
     @property
     def client(self):
         if not self._client:
-            with self.console.status("Connecting to API", spinner="point") as status:
+            with self.console.status("Connecting to the API", spinner="point") as status:
                 self._client = Client()
         return self._client
