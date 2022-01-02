@@ -5,6 +5,7 @@ from pathlib import Path
 from rich.console import Console
 
 import click
+from rich.text import Text
 
 from bqq import const, output
 from bqq.bq_client import BqClient
@@ -37,7 +38,7 @@ def cli(sql: str, file: str, yes: bool, history: bool, delete: bool, clear: bool
     console = Console(theme=const.theme)
     bq_client = BqClient(console)
     infos = Infos()
-    results = Results()
+    results = Results(console)
     result_service = ResultService(console, bq_client, infos, results)
     info_service = InfoService(console, bq_client, result_service, infos)
     ctx = click.get_current_context()
@@ -77,6 +78,8 @@ def cli(sql: str, file: str, yes: bool, history: bool, delete: bool, clear: bool
     else:
         console.print(ctx.get_help())
         ctx.exit()
+
+    # ---------------------- output -------------------------
     if job_info:
         header = output.get_info_header(job_info)
         console.rule()
@@ -98,4 +101,9 @@ def cli(sql: str, file: str, yes: bool, history: bool, delete: bool, clear: bool
                 job_info = info_service.get_info(True, job_info.query)
                 result = results.read(job_info)
         if result:
-            console.print(result)
+            if result.width > console.width:
+                with console.pager(styles=True):
+                    os.environ["LESS"] += " -S"  # enable horizontal scrolling for less
+                    console.print(result, crop=False)
+            else:
+                console.print(result, crop=False)

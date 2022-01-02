@@ -25,7 +25,9 @@ def get_info_header(job_info: JobInfo) -> Group:
         Text("Account", style=const.info_style).append(f" = {job_info.account}", style="default"),
         Text("Query cost", style=const.info_style).append(f" = {job_info.price_fmt} {cache_hit}", style="default"),
         Text("Slot time", style=const.info_style).append(f" = {job_info.slot_time}", style="default"),
-        Text("Console link", style=const.info_style).append(f" = {job_info.google_link}", style=const.link_style),
+        Text("Console link", style=const.info_style)
+        .append(" = ", style="default")
+        .append(job_info.google_link, style=const.link_style),
     )
 
 

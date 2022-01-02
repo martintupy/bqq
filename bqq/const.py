@@ -4,39 +4,52 @@ import yaml
 from rich.style import Style
 from rich.theme import Theme
 
-BQQ_HOME = os.environ.get("BQQ_HOME", f"{Path.home()}/.bqq")
-BQQ_RESULTS = os.environ.get("BQQ_RESULTS", f"{BQQ_HOME}/results")
+BQQ_HOME = os.getenv("BQQ_HOME", f"{Path.home()}/.bqq")
+BQQ_RESULTS = os.getenv("BQQ_RESULTS", f"{BQQ_HOME}/results")
 
-BQQ_MAX_LINES = os.environ.get("BQQ_MAX_LINES", 400)
-BQQ_MAX_RESULT_ROWS = os.environ.get("BQQ_MAX_RESULT_ROWS", 1_000)
+BQQ_MAX_LINES = os.getenv("BQQ_MAX_LINES", 400)
+BQQ_MAX_RESULT_ROWS = os.getenv("BQQ_MAX_RESULT_ROWS", 1_000)
 
 BQQ_DISABLE_COLORS = os.getenv("BQQ_DISABLE_COLORS", "False").lower() in ("true", "1", "t")
-default_skin = os.path.join(os.path.dirname(__file__), "default-skin.yaml")
-BQQ_SKIN = os.environ.get("BQQ_SKIN", default_skin)
+BQQ_SKIN = os.getenv("BQQ_SKIN")
 
-skin: dict = yaml.safe_load(open(BQQ_SKIN, "r"))
-ERROR = skin.get("bqq", {}).get("error")
-DARKER = skin.get("bqq", {}).get("darker")
-INFO = skin.get("bqq", {}).get("info")
-LINK = skin.get("bqq", {}).get("link")
-KEYWORD = skin.get("bqq", {}).get("keyword")
-ID = skin.get("bqq", {}).get("id")
-TIME = skin.get("bqq", {}).get("time")
+default_skin = {
+    "error": "red",
+    "border": "grey27",
+    "darker": "grey46",
+    "info": "green",
+    "link": "light_sky_blue1",
+    "keyword": "dodger_blue1",
+}
+
+skin = default_skin
+
+if BQQ_SKIN and os.path.isfile(BQQ_SKIN):
+    skin = yaml.safe_load(open(BQQ_SKIN, "r"))
+
+ERROR = skin.get("error", default_skin["error"])
+BORDER = skin.get("border", default_skin["border"])
+DARKER = skin.get("darker", default_skin["darker"])
+INFO = skin.get("info", default_skin["info"])
+LINK = skin.get("link", default_skin["link"])
+KEYWORD = skin.get("keyword", default_skin["keyword"])
 
 error_style = Style(color=ERROR)
+border_style = Style(color=BORDER)
 darker_style = Style(color=DARKER)
 info_style = Style(color=INFO)
 link_style = Style(color=LINK)
 keyword_style = Style(color=KEYWORD)
-id_style = Style(color=ID)
-time_style = Style(color=TIME)
 
 theme = Theme(
     {
-        "progress.elapsed": "dim",
-        "prompt.default": "dim",
+        "progress.elapsed": darker_style,
+        "prompt.default": darker_style,
         "prompt.choices": "none",
-        "rule.line": "dim",
+        "rule.line": border_style,
+        "status.spinner": "none",
+        "progress.spinner": "none",
+        "repr.number": "none",
     }
 )
 

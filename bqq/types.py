@@ -102,30 +102,37 @@ class JobInfo:
 class SearchLine:
     created: Text
     query: Text
+    project: Text
+    account: Text
     job_id: Text
 
     @staticmethod
     def from_line(line: str):
         parts = line.split(const.FZF_SEPARATOR)
         search_result = None
-        if len(parts) == 3:
+        if len(parts) == 5:
             search_result = SearchLine(
                 created=parts[0],
                 query=parts[1],
-                job_id=parts[2],
+                project=parts[2].lstrip("project="),
+                account=parts[3].lstrip("account="),
+                job_id=parts[4].lstrip("id="),
             )
         return search_result
 
     @staticmethod
     def from_job_info(job_info: JobInfo):
         return SearchLine(
-            created=Text(job_info.created_fmt, style=const.time_style),
+            created=Text(job_info.created_fmt, style=const.info_style),
             query=bash_util.color_keywords(" ".join(job_info.query.split())),
-            job_id=Text(job_info.job_id, style="dim"),
+            project=Text(f"project={job_info.project}", style=const.darker_style),
+            account=Text(f"account={job_info.account}", style=const.darker_style),
+            job_id=Text(f"id={job_info.job_id}", style=const.darker_style),
         )
 
     def to_line(self, console: Console) -> str:
+        sep = Text(const.FZF_SEPARATOR, style=const.darker_style)
         segments = Text.assemble(
-            self.created, Text(const.FZF_SEPARATOR), self.query, Text(const.FZF_SEPARATOR), self.job_id
+            self.created, sep, self.query, sep, self.project, sep, self.account, sep, self.job_id
         ).render(console)
         return console._render_buffer(segments)

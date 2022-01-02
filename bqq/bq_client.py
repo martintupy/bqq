@@ -11,6 +11,6 @@ class BqClient:
     @property
     def client(self):
         if not self._client:
-            with self.console.status("Connecting to API", spinner="point", spinner_style=const.info_style) as status:
+            with self.console.status("Connecting to API", spinner="point") as status:
                 self._client = Client()
         return self._client
