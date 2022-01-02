@@ -1,7 +1,7 @@
 import re
 import subprocess
 import tempfile
-from typing import List, Tuple
+from typing import List
 
 from bqq import const
 from rich.text import Text

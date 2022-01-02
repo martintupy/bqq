@@ -2,7 +2,7 @@
 
 ## 1. Build
 ```bash
-python3 -m build
+python -m build
 ```
 
 ## 2. Check 
@@ -20,7 +20,7 @@ twine upload --repository testpypi dist/*
 ## 4. Test install
 
 ```bash
- python3 -m pip install --index-url https://test.pypi.org/simple/ bqq
+python -m pip install --index-url https://test.pypi.org/simple/ bqq
 ```
 
 
