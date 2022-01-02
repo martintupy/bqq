@@ -13,6 +13,7 @@ from bqq import const, output
 from bqq.bq_client import BqClient
 from bqq.data.infos import Infos
 from bqq.data.results import Results
+from bqq.data.schemas import Schemas
 from bqq.service.info_service import InfoService
 from bqq.service.result_service import ResultService
 
@@ -34,7 +35,8 @@ def cli(sql: str, file: str, yes: bool, history: bool, delete: bool, clear: bool
     bq_client = BqClient(console)
     infos = Infos()
     results = Results(console)
-    result_service = ResultService(console, bq_client, infos, results)
+    schemas = Schemas()
+    result_service = ResultService(console, bq_client, infos, results, schemas)
     info_service = InfoService(console, bq_client, result_service, infos)
     ctx = click.get_current_context()
     job_info = None
@@ -76,6 +78,7 @@ def cli(sql: str, file: str, yes: bool, history: bool, delete: bool, clear: bool
         if Confirm.ask(f"Clear all ({size})?", default=False, console=console):
             infos.clear()
             results.clear()
+            schemas.clear()
             console.print("All cleared.")
         ctx.exit()
     elif sync:
@@ -98,30 +101,31 @@ def cli(sql: str, file: str, yes: bool, history: bool, delete: bool, clear: bool
         sql = output.get_sql(job_info)
         console.print(sql)
         console.rule()
-        result = results.read(job_info)
-        if not result and job_info.has_result is None:
+        result_table = result_service.get_table(job_info)
+        if not result_table and job_info.has_result is None:
             if Confirm.ask("Download result?", default=False, console=console):
                 result_service.download_result(job_info.job_id)
                 job_info = infos.find_by_id(job_info.job_id)  # updated job_info
-                result = results.read(job_info)
+                result_table = result_service.get_table(job_info)
         if job_info.has_result is False:
             console.print("Query result has expired", style=const.error_style)
             console.rule()
             if Confirm.ask("Re-execute query?", default=False, console=console):
                 job_info = info_service.get_info(True, job_info.query)
-                result = results.read(job_info)
-        if result:
-            if result.width > console.width:
+                result_table = result_service.get_table(job_info)
+        if result_table:
+            if result_table.width > console.width:
                 with console.pager(styles=True):
                     os.environ["LESS"] += " -S"  # enable horizontal scrolling for less
-                    console.print(result, crop=False)
+                    console.print(result_table, crop=False)
             else:
-                console.print(result, crop=False)
+                console.print(result_table, crop=False)
 
 
 def initialize(console: Console):
     bqq_home = Prompt.ask("Enter bqq home path", default=const.DEFAULT_BQQ_HOME, console=console)
     bqq_results = f"{bqq_home}/results"
+    bqq_schemas = f"{bqq_home}/schemas"
     bqq_infos = f"{bqq_home}/infos.json"
     bqq_config = f"{bqq_home}/config.yaml"
 
@@ -129,6 +133,8 @@ def initialize(console: Console):
     console.print(f"created - {bqq_home}")
     Path(bqq_results).mkdir(parents=True, exist_ok=True)
     console.print(f"created - {bqq_results}")
+    Path(bqq_schemas).mkdir(parents=True, exist_ok=True)
+    console.print(f"created - {bqq_schemas}")
     Path(bqq_infos).touch()
     console.print(f"created - {bqq_infos}")
     Path(bqq_config).touch()

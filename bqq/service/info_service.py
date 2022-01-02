@@ -11,7 +11,7 @@ from bqq.util import bash_util
 from google.api_core.exceptions import BadRequest
 from google.cloud.bigquery.job.query import QueryJob, QueryJobConfig
 from rich.console import Console
-from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn, track
+from rich.progress import Progress, TextColumn, TimeElapsedColumn
 from rich.text import Text
 
 
@@ -63,7 +63,6 @@ class InfoService:
             console=self.console,
         ) as progress:
             task = progress.add_task("Synchronizing jobs")
-            a = progress.get_time
             for job in jobs:
                 if isinstance(job, QueryJob):
                     job_info = JobInfo.from_query_job(job)

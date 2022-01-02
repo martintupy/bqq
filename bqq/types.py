@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Mapping, Optional
+from typing import List, Mapping, Optional
 
 from dateutil import tz
 from dateutil.relativedelta import relativedelta
@@ -136,3 +136,9 @@ class SearchLine:
             self.created, sep, self.query, sep, self.project, sep, self.account, sep, self.job_id
         ).render(console)
         return console._render_buffer(segments)
+
+
+@dataclass
+class Result:
+    header: List[str]
+    rows: List[List[str]]

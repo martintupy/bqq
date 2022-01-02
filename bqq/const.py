@@ -8,6 +8,7 @@ DEFAULT_BQQ_HOME = f"{Path.home()}/.bqq"
 
 BQQ_HOME = os.getenv("BQQ_HOME", DEFAULT_BQQ_HOME)
 BQQ_RESULTS = f"{BQQ_HOME}/results"
+BQQ_SCHEMAS = f"{BQQ_HOME}/schemas"
 BQQ_INFOS = f"{BQQ_HOME}/infos.json"
 BQQ_CONFIG = f"{BQQ_HOME}/config.yaml"
 

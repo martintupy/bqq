@@ -26,19 +26,20 @@ brew install --cask google-cloud-sdk
 pip install bqq
 ```
 
-- Using [latest release](https://github.com/martintupy/bqq/releases/latest)
-
-```bash
-pip install https://github.com/martintupy/bqq/releases/latest/download/bqq.tar.gz
-```
-
 ## Usage
 
-Underlying BigQuery client relies on [application-default](https://cloud.google.com/sdk/gcloud/reference/auth/application-default) credentials. Set them up first.
+### 1. Initialize bqq
 
+```
+bqq --init
+```
+
+### 2. Set up default credentials
+> Underlying BigQuery client relies on [application-default](https://cloud.google.com/sdk/gcloud/reference/auth/application-default) credentials
 ```bash
 gcloud auth application-default login
 ```
+
 
 ## Examples
 
@@ -50,11 +51,13 @@ Usage: bqq [OPTIONS] [SQL]
 Options:
   -f, --file FILENAME  File containing SQL
   -y, --yes            Automatic yes to prompt
-  -h, --history        Search history
-  -d, --delete         Delete job from history
+  -h, --history        Search local history
+  -d, --delete         Delete job from history (local & cloud)
   -i, --info           Show gcloud configuration
-  --clear              Clear history
+  --clear              Clear local history
   --sync               Sync history from cloud
+  --init               Initialize bqq environment
+  --version            Show the version and exit.
   --help               Show this message and exit.
 ```
 
