@@ -22,6 +22,7 @@ def get_info_header(job_info: JobInfo) -> Group:
     return Group(
         Text("Creation time", style=const.info_style).append(f" = {job_info.created_fmt}", style="default"),
         Text("Project", style=const.info_style).append(f" = {job_info.project}", style="default"),
+        Text("Job Id", style=const.info_style).append(f" = {job_info.job_id}", style="default"),
         Text("Account", style=const.info_style).append(f" = {job_info.account}", style="default"),
         Text("Query cost", style=const.info_style).append(f" = {job_info.price_fmt} {cache_hit}", style="default"),
         Text("Slot time", style=const.info_style).append(f" = {job_info.slot_time}", style="default"),

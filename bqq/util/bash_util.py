@@ -15,8 +15,8 @@ def color_keywords(query: str) -> Text:
     return text
 
 
-def fzf(choices: List[str], multi=False) -> List[str]:
-    choices.sort(reverse=True, key=_fzf_key)
+def fzf(choices: List[str], multi=False, key=None) -> List[str]:
+    choices.sort(reverse=True, key=key)
     choices_str = "\n".join(map(str, choices))
     selection = []
     multi = "--multi" if multi else None
@@ -31,9 +31,3 @@ def fzf(choices: List[str], multi=False) -> List[str]:
             with open(output_file.name) as f:
                 selection = [line.strip("\n") for line in f.readlines()]
     return selection
-
-
-def _fzf_key(line: str) -> str:
-    ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
-    escaped = ansi_escape.sub("", line)
-    return escaped.split(const.FZF_SEPARATOR)[0]

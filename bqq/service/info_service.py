@@ -1,9 +1,9 @@
-from datetime import datetime, timedelta
 from typing import List, Optional
 
 from rich.prompt import Confirm
 from bqq import const, output
 from bqq.bq_client import BqClient
+from bqq.config import Config
 from bqq.data.infos import Infos
 from bqq.service.result_service import ResultService
 from bqq.types import JobInfo, SearchLine
@@ -11,13 +11,20 @@ from bqq.util import bash_util
 from google.api_core.exceptions import BadRequest
 from google.cloud.bigquery.job.query import QueryJob, QueryJobConfig
 from rich.console import Console
-from rich.progress import Progress, TextColumn, TimeElapsedColumn
 from rich.text import Text
 
 
 class InfoService:
-    def __init__(self, console: Console, bq_client: BqClient, result_service: ResultService, infos: Infos) -> None:
+    def __init__(
+        self,
+        console: Console,
+        config: Config,
+        bq_client: BqClient,
+        result_service: ResultService,
+        infos: Infos,
+    ) -> None:
         self.console = console
+        self.config = config
         self.infos = infos
         self.bq_client = bq_client
         self.result_service = result_service
@@ -28,7 +35,7 @@ class InfoService:
         for row in rows:
             search_line = SearchLine.from_job_info(row)
             choices.append(search_line.to_line(self.console))
-        lines = bash_util.fzf(choices, multi=True)
+        lines = bash_util.fzf(choices, multi=True, key=SearchLine.sort_key)
         infos = []
         for line in lines:
             search_line = SearchLine.from_line(line)
@@ -43,7 +50,7 @@ class InfoService:
         for row in rows:
             search_line = SearchLine.from_job_info(row)
             choices.append(search_line.to_line(self.console))
-        lines = bash_util.fzf(choices)
+        lines = bash_util.fzf(choices, key=SearchLine.sort_key)
         search_line = next((SearchLine.from_line(line) for line in lines), None)
         job_info = None
         if search_line:
@@ -51,26 +58,12 @@ class InfoService:
         return job_info
 
     def sync_infos(self):
-        days_ago = datetime.utcnow() - timedelta(days=const.HISTORY_DAYS)
-        jobs = self.bq_client.client.list_jobs(min_creation_time=days_ago, state_filter="DONE")
-        size = 0
-        with Progress(
-            TextColumn("[progress.description]{task.description}", style=const.info_style),
-            "•",
-            TextColumn("[progress.completed]{task.completed}"),
-            "•",
-            TimeElapsedColumn(),
-            console=self.console,
-        ) as progress:
-            task = progress.add_task("Synchronizing jobs")
-            for job in jobs:
-                if isinstance(job, QueryJob):
-                    job_info = JobInfo.from_query_job(job)
-                    progress.advance(task)
-                    size += 1
-                    self.infos.upsert(job_info)
-        text = Text("Jobs synchronized", style=const.info_style)
-        self.console.print(text, f" • {size}")
+        jobs = self.bq_client.list_query_jobs()
+        for job in jobs:
+            job_info = JobInfo.from_query_job(job)
+            self.infos.upsert(job_info)
+        text = Text("Jobs synchronized", style=const.info_style).append(f" = {len(jobs)}", style="default")
+        self.console.print(text)
 
     def dry_run(self, query: str) -> Optional[QueryJob]:
         job_config = QueryJobConfig()
@@ -90,7 +83,11 @@ class InfoService:
             if job:
                 headers = output.get_dry_info_header(job)
                 self.console.print(headers)
-                confirmed = Confirm.ask("Do you want to continue?", default=False, console=self.console)
+                confirmed = Confirm.ask(
+                    Text("", style=const.darker_style).append("Do you want to continue?", style=const.question_style),
+                    default=False,
+                    console=self.console,
+                )
         if confirmed:
             query_job = self.bq_client.client.query(query)
             self.result_service.write_result(query_job)  # extract result before job info

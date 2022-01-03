@@ -1,3 +1,4 @@
+import re
 from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Mapping, Optional
@@ -119,6 +120,12 @@ class SearchLine:
                 job_id=parts[4].lstrip("id="),
             )
         return search_result
+
+    @staticmethod
+    def sort_key(line: str) -> str:
+        ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
+        escaped = ansi_escape.sub("", line)
+        return escaped.split(const.FZF_SEPARATOR)[0]
 
     @staticmethod
     def from_job_info(job_info: JobInfo):

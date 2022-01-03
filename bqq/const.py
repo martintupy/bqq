@@ -12,17 +12,16 @@ BQQ_SCHEMAS = f"{BQQ_HOME}/schemas"
 BQQ_INFOS = f"{BQQ_HOME}/infos.json"
 BQQ_CONFIG = f"{BQQ_HOME}/config.yaml"
 
-BQQ_MAX_RESULT_ROWS = os.getenv("BQQ_MAX_RESULT_ROWS", 1_000)
-
 BQQ_DISABLE_COLORS = os.getenv("BQQ_DISABLE_COLORS", "False").lower() in ("true", "1", "t")
 BQQ_SKIN = os.getenv("BQQ_SKIN")
 
 default_skin = {
+    "question": "yellow3",
+    "info": "green",
     "error": "red",
     "warning": "gold3",
     "border": "grey27",
     "darker": "grey46",
-    "info": "green",
     "link": "light_sky_blue1",
     "keyword": "dodger_blue1",
 }
@@ -30,29 +29,23 @@ default_skin = {
 skin = default_skin
 
 if BQQ_SKIN and os.path.isfile(BQQ_SKIN):
-    skin = yaml.safe_load(open(BQQ_SKIN, "r"))
+    bqq_skin = yaml.safe_load(open(BQQ_SKIN, "r"))
+    skin = {**skin, **bqq_skin}
 
-ERROR = skin.get("error", default_skin["error"])
-WARNING = skin.get("warning", default_skin["warning"])
-BORDER = skin.get("border", default_skin["border"])
-DARKER = skin.get("darker", default_skin["darker"])
-INFO = skin.get("info", default_skin["info"])
-LINK = skin.get("link", default_skin["link"])
-KEYWORD = skin.get("keyword", default_skin["keyword"])
-
-error_style = Style(color=ERROR)
-warning_style = Style(color=WARNING)
-border_style = Style(color=BORDER)
-darker_style = Style(color=DARKER)
-info_style = Style(color=INFO)
-link_style = Style(color=LINK)
-keyword_style = Style(color=KEYWORD)
+question_style = Style(color=skin["question"])
+info_style = Style(color=skin["info"])
+warning_style = Style(color=skin["warning"])
+error_style = Style(color=skin["error"])
+border_style = Style(color=skin["border"])
+darker_style = Style(color=skin["darker"])
+link_style = Style(color=skin["link"])
+keyword_style = Style(color=skin["keyword"])
 
 theme = Theme(
     {
         "progress.elapsed": darker_style,
         "prompt.default": darker_style,
-        "prompt.choices": "none",
+        "prompt.choices": "default",
         "rule.line": border_style,
         "repr.path": darker_style,
         "repr.filename": darker_style,
@@ -63,8 +56,6 @@ theme = Theme(
 )
 
 FZF_SEPARATOR = " ~ "
-
-HISTORY_DAYS = 30
 
 BQ_KEYWORDS = [
     "ALL",

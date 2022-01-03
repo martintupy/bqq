@@ -1,6 +1,6 @@
 from typing import Optional
 
-from bqq import const
+from bqq import const, Config
 from bqq.bq_client import BqClient
 from bqq.data.infos import Infos
 from bqq.data.results import Results
@@ -17,8 +17,11 @@ from rich.table import Table
 class ResultService:
     type_to_justify = {"STRING": "left", "INTEGER": "right"}
 
-    def __init__(self, console: Console, bq_client: BqClient, infos: Infos, results: Results, schemas: Schemas):
+    def __init__(
+        self, console: Console, config: Config, bq_client: BqClient, infos: Infos, results: Results, schemas: Schemas
+    ):
         self.console = console
+        self.config = config
         self.bq_client = bq_client
         self.infos = infos
         self.results = results
@@ -26,7 +29,7 @@ class ResultService:
 
     def write_result(self, query_job: QueryJob):
         try:
-            rows = query_job.result(max_results=const.BQQ_MAX_RESULT_ROWS)
+            rows = query_job.result(max_results=self.config.max_results)
             self.schemas.write(query_job.project, query_job.job_id, rows.schema)
             self.results.write(query_job.project, query_job.job_id, rows)
         except (BadRequest, NotFound) as e:
