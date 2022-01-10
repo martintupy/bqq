@@ -69,7 +69,7 @@ def cli(
             renderable=Text("bqq --init"),
             expand=False,
             padding=(1, 3),
-            border_style=const.warning_style,
+            border_style=const.request_style,
         )
         console.print(panel)
         ctx.exit()
@@ -79,7 +79,7 @@ def cli(
             renderable=Text("bqq --set-project"),
             expand=False,
             padding=(1, 3),
-            border_style=const.warning_style,
+            border_style=const.request_style,
         )
         console.print(panel)
         ctx.exit()
@@ -99,19 +99,19 @@ def cli(
         if infos:
             if Confirm.ask(
                 Text("", style=const.darker_style).append(
-                    f"Delete selected ({len(infos)})?", style=const.question_style
+                    f"Delete selected ({len(infos)})?", style=const.request_style
                 ),
                 default=True,
                 console=console,
             ):
                 info_service.delete_infos(infos)
             else:
-                console.print(f"Nothing deleted.")
+                console.print(f"Nothing deleted.", style=const.info_style)
             ctx.exit()
     elif clear:
         size = len(infos.get_all())
         if Confirm.ask(
-            Text("", style=const.darker_style).append(f"Remove all ({size})?", style=const.question_style),
+            Text("", style=const.darker_style).append(f"Remove all ({size})?", style=const.request_style),
             default=False,
             console=console,
         ):
@@ -145,7 +145,7 @@ def cli(
         result_table = result_service.get_table(job_info)
         if not result_table and job_info.has_result is None:
             if Confirm.ask(
-                Text("", style=const.darker_style).append("Download result?", style=const.question_style),
+                Text("", style=const.darker_style).append("Download result?", style=const.request_style),
                 default=False,
                 console=console,
             ):
@@ -156,7 +156,7 @@ def cli(
             console.print("Query result has expired", style=const.error_style)
             console.rule()
             if Confirm.ask(
-                Text("", style=const.darker_style).append("Re-execute query?", style=const.question_style),
+                Text("", style=const.darker_style).append("Re-execute query?", style=const.request_style),
                 default=False,
                 console=console,
             ):
@@ -173,7 +173,7 @@ def cli(
 
 def initialize(console: Console, auth: Auth, project_service: ProjectService):
     bqq_home = Prompt.ask(
-        Text("", style=const.darker_style).append("Enter bqq home path", style=const.question_style),
+        Text("", style=const.darker_style).append("Enter bqq home path", style=const.request_style),
         default=const.DEFAULT_BQQ_HOME,
         console=console,
     )
@@ -195,7 +195,7 @@ def initialize(console: Console, auth: Auth, project_service: ProjectService):
     console.print(Text("Created", style=const.info_style).append(f": {bqq_config}", style=const.darker_style))
 
     Prompt.ask(
-        Text("", style=const.darker_style).append("Login to google account", style=const.question_style),
+        Text("", style=const.darker_style).append("Login to google account", style=const.request_style),
         choices=None,
         default="Press enter",
         console=console,
@@ -203,7 +203,7 @@ def initialize(console: Console, auth: Auth, project_service: ProjectService):
     auth.login()
 
     Prompt.ask(
-        Text("", style=const.darker_style).append("Set google project", style=const.question_style),
+        Text("", style=const.darker_style).append("Set google project", style=const.request_style),
         choices=None,
         default="Press enter",
         console=console,
@@ -219,6 +219,6 @@ def initialize(console: Console, auth: Auth, project_service: ProjectService):
                 renderable=group,
                 expand=False,
                 padding=(1, 3),
-                border_style=const.warning_style,
+                border_style=const.request_style,
             ),
         )

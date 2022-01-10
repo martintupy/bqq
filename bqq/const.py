@@ -4,17 +4,6 @@ import yaml
 from rich.style import Style
 from rich.theme import Theme
 
-# google-cloud-sdk oauth2 credentials
-# https://github.com/twistedpair/google-cloud-sdk/blob/10fc3b9ccce1c13eb41a592faa6cc524610e8a16/google-cloud-sdk/lib/googlecloudsdk/core/config.py#L168-L169
-# picked from tarball https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-367.0.0-linux-x86_64.tar.gz
-CLOUDSDK_CLIENT_ID = "32555940559.apps.googleusercontent.com"
-CLOUDSDK_CLIENT_NOTSOSECRET = "ZmssLNjJy2998hD4CTg2ejr2"
-
-CLOUDSDK_CLIENT_ID = "32555940559.apps.googleusercontent.com"
-CLOUDSDK_CLIENT_NOTSOSECRET = "ZmssLNjJy2998hD4CTg2ejr2"
-
-SCOPE = "https://www.googleapis.com/auth/bigquery"
-
 DEFAULT_BQQ_HOME = f"{Path.home()}/.bqq"
 
 BQQ_HOME = os.getenv("BQQ_HOME", DEFAULT_BQQ_HOME)
@@ -27,10 +16,9 @@ BQQ_DISABLE_COLORS = os.getenv("BQQ_DISABLE_COLORS", "False").lower() in ("true"
 BQQ_SKIN = os.getenv("BQQ_SKIN")
 
 default_skin = {
-    "question": "yellow3",
+    "request": "gold3",
     "info": "green",
     "error": "red",
-    "warning": "gold3",
     "border": "grey27",
     "darker": "grey46",
     "alternate": "grey50",
@@ -44,9 +32,8 @@ if BQQ_SKIN and os.path.isfile(BQQ_SKIN):
     bqq_skin = yaml.safe_load(open(BQQ_SKIN, "r"))
     skin = {**skin, **bqq_skin}
 
-question_style = Style(color=skin["question"])
+request_style = Style(color=skin["request"])
 info_style = Style(color=skin["info"])
-warning_style = Style(color=skin["warning"])
 error_style = Style(color=skin["error"])
 border_style = Style(color=skin["border"])
 darker_style = Style(color=skin["darker"])

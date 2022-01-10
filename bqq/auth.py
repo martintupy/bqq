@@ -21,6 +21,7 @@ class Auth:
             webbrowser.get()
             host = "localhost"
             wsgi_app = _RedirectWSGIApp("The authentication flow has completed. You may close this window.")
+            wsgi_app.allow_reuse_address = False
             local_server = wsgiref.simple_server.make_server(host, 0, wsgi_app, handler_class=_WSGIRequestHandler)
             flow.redirect_uri = f"http://{host}:{local_server.server_port}/"
             auth_url, _ = flow.authorization_url()
@@ -36,10 +37,10 @@ class Auth:
             flow.redirect_uri = "urn:ietf:wg:oauth:2.0:oob"
             auth_url, _ = flow.authorization_url()
             self.console.print(
-                Text("Open following link", style=const.question_style).append(f": {auth_url}", style=const.link_style),
+                Text("Open following link", style=const.request_style).append(f": {auth_url}", style=const.link_style),
             )
             code = self.console.input(
-                Text("Enter verification code", style=const.question_style).append(f": ", style=const.darker_style)
+                Text("Enter verification code", style=const.request_style).append(f": ", style=const.darker_style)
             )
             flow.fetch_token(code=code)
         self.config.credentials = flow.credentials.to_json()

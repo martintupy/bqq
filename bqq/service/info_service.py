@@ -1,6 +1,5 @@
 from typing import List, Optional
 
-from rich.prompt import Confirm
 from bqq import const, output
 from bqq.bq_client import BqClient
 from bqq.config import Config
@@ -11,6 +10,7 @@ from bqq.util import bash_util
 from google.api_core.exceptions import BadRequest
 from google.cloud.bigquery.job.query import QueryJob, QueryJobConfig
 from rich.console import Console
+from rich.prompt import Confirm
 from rich.text import Text
 
 
@@ -84,7 +84,7 @@ class InfoService:
                 headers = output.get_dry_info_header(job)
                 self.console.print(headers)
                 confirmed = Confirm.ask(
-                    Text("", style=const.darker_style).append("Do you want to continue?", style=const.question_style),
+                    Text("", style=const.darker_style).append("Do you want to continue?", style=const.request_style),
                     default=False,
                     console=self.console,
                 )
@@ -101,4 +101,6 @@ class InfoService:
                 job_id=job_info.job_id, project=job_info.project, location=job_info.location
             )
             self.infos.remove(job_info)
-            self.console.print(f"Job {job_info.job_id} deleted.")
+            self.console.print(
+                Text("Job deleted", style=const.info_style).append(f": {job_info.job_id}", style=const.darker_style)
+            )
