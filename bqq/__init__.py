@@ -10,6 +10,7 @@ from rich.prompt import Confirm, Prompt
 from rich.text import Text
 
 from bqq import const, output
+from bqq.auth import Auth
 from bqq.bq_client import BqClient
 from bqq.config import Config
 from bqq.data.infos import Infos
@@ -45,8 +46,10 @@ def cli(
     set_project: bool,
 ):
     """BiqQuery query."""
+    ctx = click.get_current_context()
     config = Config(config_path=const.BQQ_CONFIG)
-    console = Console(theme=const.theme)
+    console = Console(theme=const.theme, soft_wrap=True)
+    auth = Auth(config, console)
     bq_client = BqClient(console, config)
     infos = Infos()
     results = Results(console)
@@ -54,21 +57,31 @@ def cli(
     project_service = ProjectService(console, config, bq_client)
     result_service = ResultService(console, config, bq_client, infos, results, schemas)
     info_service = InfoService(console, config, bq_client, result_service, infos)
-    ctx = click.get_current_context()
     job_info = None
     if init:
-        initialize(console, project_service)
+        initialize(console, auth, project_service)
         ctx.exit()
+    elif set_project:
+        project_service.set_project()
     elif not os.path.exists(const.BQQ_HOME):
-        console.print(
-            Panel(
-                title="Not initialized, run",
-                renderable=Text("bqq --init"),
-                expand=False,
-                padding=(1, 3),
-                border_style=const.warning_style,
-            )
+        panel = Panel(
+            title="Not initialized, run",
+            renderable=Text("bqq --init"),
+            expand=False,
+            padding=(1, 3),
+            border_style=const.warning_style,
         )
+        console.print(panel)
+        ctx.exit()
+    elif not config.project:
+        panel = Panel(
+            title="No project set, run",
+            renderable=Text("bqq --set-project"),
+            expand=False,
+            padding=(1, 3),
+            border_style=const.warning_style,
+        )
+        console.print(panel)
         ctx.exit()
     elif file:
         query = file.read()
@@ -81,8 +94,6 @@ def cli(
         job_info = info_service.get_info(yes, sql)
     elif history:
         job_info = info_service.search_one()
-    elif set_project:
-        project_service.set_project()
     elif delete:
         infos = info_service.search()
         if infos:
@@ -160,7 +171,7 @@ def cli(
                 console.print(result_table, crop=False)
 
 
-def initialize(console: Console, project_service: ProjectService):
+def initialize(console: Console, auth: Auth, project_service: ProjectService):
     bqq_home = Prompt.ask(
         Text("", style=const.darker_style).append("Enter bqq home path", style=const.question_style),
         default=const.DEFAULT_BQQ_HOME,
@@ -183,12 +194,21 @@ def initialize(console: Console, project_service: ProjectService):
     config.write_default()
     console.print(Text("Created", style=const.info_style).append(f": {bqq_config}", style=const.darker_style))
 
-    if Confirm.ask(
-        Text("", style=const.darker_style).append("Set google project?", style=const.question_style),
-        default=True,
+    Prompt.ask(
+        Text("", style=const.darker_style).append("Login to google account", style=const.question_style),
+        choices=None,
+        default="Press enter",
         console=console,
-    ):
-        project_service.set_project()
+    )
+    auth.login()
+
+    Prompt.ask(
+        Text("", style=const.darker_style).append("Set google project", style=const.question_style),
+        choices=None,
+        default="Press enter",
+        console=console,
+    )
+    project_service.set_project()
 
     if bqq_home != const.DEFAULT_BQQ_HOME:
         group = Group(Text(f"export BQQ_HOME={bqq_home}"))

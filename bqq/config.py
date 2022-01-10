@@ -1,12 +1,26 @@
 from pathlib import Path
+from typing import List
+import json
 
 import yaml
 
 
 class Config:
     default = {
+        "project": "",
         "max_results": 1_000,
         "history_days": 30,
+        "client_config": {  # client_config of the google-cloud-sdk
+            "installed": {
+                "client_id": "32555940559.apps.googleusercontent.com",
+                "client_secret": "ZmssLNjJy2998hD4CTg2ejr2",
+                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                "token_uri": "https://oauth2.googleapis.com/token",
+            }
+        },
+        "scopes": ["https://www.googleapis.com/auth/bigquery"],
+        "credentials": None,
+        "project": "",
     }
 
     def __init__(self, config_path) -> None:
@@ -31,7 +45,7 @@ class Config:
         return self._conf
 
     @property
-    def project(self) -> int:
+    def project(self) -> str:
         return self.conf["project"]
 
     @project.setter
@@ -46,3 +60,20 @@ class Config:
     @property
     def history_days(self) -> int:
         return self.conf["history_days"]
+
+    @property
+    def client_config(self) -> dict:
+        return self.conf["client_config"]
+
+    @property
+    def scopes(self) -> List[str]:
+        return self.conf["scopes"]
+
+    @property
+    def credentials(self) -> dict:
+        return json.loads(self.conf["credentials"])
+
+    @credentials.setter
+    def credentials(self, credentials: dict):
+        conf = {**self.conf, "credentials": credentials}
+        self._save_conf(conf)

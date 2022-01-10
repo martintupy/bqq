@@ -1,7 +1,9 @@
-FROM gcr.io/google.com/cloudsdktool/cloud-sdk
+FROM python
 
-RUN apt-get install fzf
+ARG version
 
-COPY dist/bqq.tar.gz bqq.tar.gz
+RUN apt update && apt install fzf
+
+COPY dist/bqq-${version}.tar.gz bqq.tar.gz
 
 RUN pip3 install bqq.tar.gz

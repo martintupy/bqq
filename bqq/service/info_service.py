@@ -30,7 +30,7 @@ class InfoService:
         self.result_service = result_service
 
     def search(self) -> List[JobInfo]:
-        rows = self.infos.get_all()
+        rows = self.infos.search(self.config.project)
         choices = []
         for row in rows:
             search_line = SearchLine.from_job_info(row)
@@ -45,7 +45,7 @@ class InfoService:
         return infos
 
     def search_one(self) -> JobInfo:
-        rows = self.infos.get_all()
+        rows = self.infos.search(self.config.project)
         choices = []
         for row in rows:
             search_line = SearchLine.from_job_info(row)

@@ -3,6 +3,7 @@ from typing import List
 
 from google.cloud.bigquery import Client
 from google.cloud.bigquery.job.query import QueryJob
+from google.oauth2.credentials import Credentials
 from rich.console import Console
 from rich.progress import Progress, TextColumn, TimeElapsedColumn
 from rich.text import Text
@@ -21,7 +22,10 @@ class BqClient:
     def client(self) -> Client:
         if not self._client:
             with self.console.status(Text("Connecting to the API", style=const.darker_style), spinner="point"):
-                self._client = Client()
+                self._client = Client(
+                    project=self.config.project,
+                    credentials=Credentials.from_authorized_user_info(self.config.credentials),
+                )
         return self._client
 
     def list_query_jobs(self) -> List[QueryJob]:

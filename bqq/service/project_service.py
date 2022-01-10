@@ -1,9 +1,8 @@
-from rich.console import Console
-from rich.text import Text
-
 from bqq import BqClient, const
 from bqq.config import Config
 from bqq.util import bash_util
+from rich.console import Console
+from rich.text import Text
 
 
 class ProjectService:
@@ -18,5 +17,5 @@ class ProjectService:
         if project:
             self.config.project = project
             self.console.print(
-                Text("Config updated", style=const.info_style).append(f": project={project}", style=const.darker_style)
+                Text("Project updated", style=const.info_style).append(f": {project}", style=const.darker_style)
             )

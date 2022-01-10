@@ -32,6 +32,12 @@ class Infos:
     def update_has_result(self, job_id: str, has_result: bool):
         self.db.update({"has_result": has_result}, self.InfoQuery.job_id == job_id)
 
+    def search(self, project: str) -> List[JobInfo]:
+        infos = []
+        for row in self.db.search(self.InfoQuery.project == project):
+            infos.append(JobInfo.from_document(row))
+        return infos
+
     def get_all(self) -> List[JobInfo]:
         all = []
         for row in self.db.all():

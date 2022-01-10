@@ -40,14 +40,14 @@ class ResultService:
         if isinstance(job, QueryJob):
             self.write_result(job)
         else:
-            self.console.print("Query job doesn't exist")
+            self.console.print(Text("Query job doesn't exist", style=const.error_style))
 
     def get_table(self, job_info: JobInfo) -> Optional[Table]:
         table = None
         schema = self.schemas.read(job_info)
         result = self.results.read(job_info)
         if schema and result:
-            table = Table(box=box.ROUNDED, border_style=const.border_style, row_styles=["none", const.darker_style])
+            table = Table(box=box.ROUNDED, border_style=const.border_style, row_styles=["none", const.alternate_style])
             table.add_column(justify="right")
             for field, col in zip(schema, result.header):
                 justify = self.type_to_justify.get(field.field_type, "left")
