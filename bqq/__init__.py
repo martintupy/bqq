@@ -19,6 +19,7 @@ from bqq.data.schemas import Schemas
 from bqq.service.info_service import InfoService
 from bqq.service.project_service import ProjectService
 from bqq.service.result_service import ResultService
+from bqq.service.schema_service import SchemaService
 
 
 @click.command()
@@ -26,9 +27,9 @@ from bqq.service.result_service import ResultService
 @click.option("-f", "--file", help="File containing SQL", type=click.File("r"))
 @click.option("-y", "--yes", help="Automatic yes to prompt", is_flag=True)
 @click.option("-h", "--history", help="Search local history", is_flag=True)
-@click.option("-d", "--delete", help="Delete job from history (local & cloud)", is_flag=True)
-@click.option("-i", "--info", help="Show gcloud configuration", is_flag=True)
+@click.option("--delete", help="Delete job from history (local & cloud)", is_flag=True)
 @click.option("--clear", help="Clear local history", is_flag=True)
+@click.option("--schema", help="Show schema", is_flag=True)
 @click.option("--sync", help="Synchronize job history from cloud", is_flag=True)
 @click.option("--init", help="Initialize bqq environment", is_flag=True)
 @click.option("--set-project", help="Set project for queries", is_flag=True)
@@ -40,9 +41,9 @@ def cli(
     history: bool,
     delete: bool,
     clear: bool,
+    schema: bool,
     sync: bool,
     init: bool,
-    info: bool,
     set_project: bool,
 ):
     """BiqQuery query."""
@@ -57,6 +58,7 @@ def cli(
     project_service = ProjectService(console, config, bq_client)
     result_service = ResultService(console, config, bq_client, infos, results, schemas)
     info_service = InfoService(console, config, bq_client, result_service, infos)
+    schema_service = SchemaService(console, config, bq_client)
     job_info = None
     if init:
         initialize(console, auth, project_service)
@@ -122,13 +124,11 @@ def cli(
         else:
             console.print(Text("Nothing removed.", style=const.info_style))
         ctx.exit()
+    elif schema:
+        console.print(schema_service.get_schema())
+        ctx.exit()
     elif sync:
         info_service.sync_infos()
-    elif info:
-        out = subprocess.check_output(["gcloud", "info", "--format=json"])
-        gcloud_info = output.get_gcloud_info(json.loads(out))
-        console.print(gcloud_info)
-        ctx.exit()
     else:
         console.print(ctx.get_help())
         ctx.exit()
