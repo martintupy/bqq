@@ -13,10 +13,6 @@
 ```bash
 brew install fzf
 ```
-- gcloud - https://cloud.google.com/sdk/docs/install (recommended)
-```bash
-brew install --cask google-cloud-sdk
-```
 
 ## Installation
 
@@ -26,20 +22,11 @@ brew install --cask google-cloud-sdk
 pip install bqq
 ```
 
-## Usage
-
-### 1. Initialize bqq
+#### Initialize bqq
 
 ```
 bqq --init
 ```
-
-### 2. Set up default credentials
-> Underlying BigQuery client relies on [application-default](https://cloud.google.com/sdk/gcloud/reference/auth/application-default) credentials
-```bash
-gcloud auth application-default login
-```
-
 
 ## Examples
 

@@ -85,7 +85,7 @@ class InfoService:
                 self.console.print(headers)
                 confirmed = Confirm.ask(
                     Text("", style=const.darker_style).append("Do you want to continue?", style=const.request_style),
-                    default=False,
+                    default=True,
                     console=self.console,
                 )
         if confirmed:

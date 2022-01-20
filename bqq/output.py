@@ -3,6 +3,7 @@ from rich.console import Group
 from rich.text import Text
 
 from bqq import const
+from bqq.config import Config
 from bqq.types import JobInfo
 from bqq.util import bash_util, bq_util
 
@@ -42,4 +43,11 @@ def get_gcloud_info(json: dict) -> Group:
     return Group(
         Text("Project", style=const.info_style).append(f" = {project}", style="default"),
         Text("Account", style=const.info_style).append(f" = {account}", style="default"),
+    )
+
+
+def get_config_info(config: Config) -> Group:
+    return Group(
+        Text("Email", style=const.info_style).append(f" = {config.email}", style="default"),
+        Text("Project", style=const.info_style).append(f" = {config.project}", style="default"),
     )

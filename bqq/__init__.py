@@ -32,6 +32,7 @@ from bqq.service.schema_service import SchemaService
 @click.option("--schema", help="Show schema", is_flag=True)
 @click.option("--sync", help="Synchronize job history from cloud", is_flag=True)
 @click.option("--init", help="Initialize bqq environment", is_flag=True)
+@click.option("--info", help="Print info of currently logged account", is_flag=True)
 @click.option("--set-project", help="Set project for queries", is_flag=True)
 @click.version_option()
 def cli(
@@ -44,6 +45,7 @@ def cli(
     schema: bool,
     sync: bool,
     init: bool,
+    info: bool,
     set_project: bool,
 ):
     """BiqQuery query."""
@@ -63,6 +65,8 @@ def cli(
     if init:
         initialize(console, auth, project_service)
         ctx.exit()
+    elif info:
+        console.print(output.get_config_info(config))
     elif set_project:
         project_service.set_project()
     elif not os.path.exists(const.BQQ_HOME):
@@ -146,7 +150,7 @@ def cli(
         if not result_table and job_info.has_result is None:
             if Confirm.ask(
                 Text("", style=const.darker_style).append("Download result?", style=const.request_style),
-                default=False,
+                default=True,
                 console=console,
             ):
                 result_service.download_result(job_info.job_id)
@@ -157,7 +161,7 @@ def cli(
             console.rule()
             if Confirm.ask(
                 Text("", style=const.darker_style).append("Re-execute query?", style=const.request_style),
-                default=False,
+                default=True,
                 console=console,
             ):
                 job_info = info_service.get_info(True, job_info.query)

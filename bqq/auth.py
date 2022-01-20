@@ -3,6 +3,7 @@ import wsgiref.simple_server
 import wsgiref.util
 
 from google_auth_oauthlib.flow import _WSGIRequestHandler, Flow, _RedirectWSGIApp
+import requests
 from rich.console import Console
 from rich.text import Text
 
@@ -43,5 +44,11 @@ class Auth:
                 Text("Enter verification code", style=const.request_style).append(f": ", style=const.darker_style)
             )
             flow.fetch_token(code=code)
+
+        response = requests.get(
+            "https://www.googleapis.com/oauth2/v1/userinfo",
+            headers={"Authorization": f"Bearer {flow.credentials.token}"},
+        )
+        self.config.email = response.json()["email"]
         self.config.credentials = flow.credentials.to_json()
         self.console.print(Text("Credentials updated", style=const.info_style))

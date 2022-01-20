@@ -1,6 +1,6 @@
+import json
 from pathlib import Path
 from typing import List
-import json
 
 import yaml
 
@@ -18,9 +18,14 @@ class Config:
                 "token_uri": "https://oauth2.googleapis.com/token",
             }
         },
-        "scopes": ["https://www.googleapis.com/auth/bigquery"],
+        "scopes": [
+            "https://www.googleapis.com/auth/bigquery",
+            "https://www.googleapis.com/auth/userinfo.email",
+            "openid",
+        ],
         "credentials": None,
         "project": "",
+        "email": "",
     }
 
     def __init__(self, config_path) -> None:
@@ -68,6 +73,15 @@ class Config:
     @property
     def scopes(self) -> List[str]:
         return self.conf["scopes"]
+
+    @property
+    def email(self) -> str:
+        return self.conf["email"]
+
+    @email.setter
+    def email(self, email: str):
+        conf = {**self.conf, "email": email}
+        self._save_conf(conf)
 
     @property
     def credentials(self) -> dict:
